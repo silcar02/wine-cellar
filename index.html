@@ -204,6 +204,19 @@ function CellarApp() {
 
   return (
     <div className="cellar-root">
+      {!editing && (
+        <nav className="tabbar">
+          <button className={"tab-btn" + (tab === "cellar" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("cellar"); }}>
+            <Icon name="list" size={18}/><span>Cellar</span>
+          </button>
+          <button className={"tab-btn" + (tab === "add" ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("add"); }}>
+            <Icon name="plus" size={18}/><span>Add</span>
+          </button>
+          <button className={"tab-btn" + (tab === "stats" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("stats"); }}>
+            <Icon name="grid" size={18}/><span>Summary</span>
+          </button>
+        </nav>
+      )}
       {tab === "cellar" && !selected && !editing && (
         <div className="screen">
           <header className="hero">
@@ -334,20 +347,6 @@ function CellarApp() {
           <button className="btn btn-secondary" style={{ width: "100%", marginTop: "1.5rem" }} onClick={exportCsv}>Export cellar as CSV</button>
         </div>
       )}
-
-      {!editing && (
-        <nav className="tabbar">
-          <button className={"tab-btn" + (tab === "cellar" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("cellar"); }}>
-            <Icon name="list" size={18}/><span>Cellar</span>
-          </button>
-          <button className={"tab-btn" + (tab === "add" ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("add"); }}>
-            <Icon name="plus" size={18}/><span>Add</span>
-          </button>
-          <button className={"tab-btn" + (tab === "stats" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("stats"); }}>
-            <Icon name="grid" size={18}/><span>Summary</span>
-          </button>
-        </nav>
-      )}
     </div>
   );
 }
@@ -453,7 +452,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
   display: flex; flex-direction: column; position: relative;
 }
 .loading { padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary); font-family: 'Fraunces', serif; font-size: 18px; }
-.screen { padding: 1.25rem 1.25rem 5.5rem; flex: 1; overflow-y: auto; }
+.screen { padding: 1.25rem; flex: 1; overflow-y: auto; }
 .hero { padding: 1.5rem 0 1.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
 .hero-small { border-bottom: none; padding-bottom: 0.5rem; }
 .hero-label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
@@ -522,7 +521,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
 .bar-track { flex: 1; height: 8px; background: var(--surface-raised); border-radius: 4px; overflow: hidden; }
 .bar-fill { height: 100%; background: var(--brass); border-radius: 4px; }
 .bar-row-value { font-size: 12px; width: 24px; text-align: right; }
-.tabbar { position: absolute; bottom: 0; left: 0; right: 0; display: flex; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 10px; }
+.tabbar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 0 8px; flex-shrink: 0; }
 .tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; }
 .tab-active { color: var(--brass); }
 </style>
