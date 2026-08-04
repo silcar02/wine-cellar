@@ -97,6 +97,7 @@ function CellarApp() {
   const [search, setSearch] = useState("");
   const [colorFilter, setColorFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [drillFilter, setDrillFilter] = useState(null);
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -105,7 +106,19 @@ function CellarApp() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setWines(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        const byId = Object.fromEntries(RAW_WINES.map((w) => [w.id, w]));
+        let changed = false;
+        const migrated = parsed.map((w) => {
+          if (w.region !== undefined && w.country !== undefined) return w;
+          changed = true;
+          const src = byId[w.id];
+          return { ...w, region: w.region ?? (src ? src.region : ""), country: w.country ?? (src ? src.country : "") };
+        });
+        setWines(migrated);
+        if (changed) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        }
       } else {
         const initial = RAW_WINES.map(normalize);
         setWines(initial);
@@ -130,10 +143,11 @@ function CellarApp() {
         if (term && !(w.label.toLowerCase().includes(term) || w.variety.toLowerCase().includes(term))) return false;
         if (colorFilter !== "All" && classify(w.variety) !== colorFilter) return false;
         if (statusFilter !== "All" && parseDrinkWindow(w.cellarRaw).status !== statusFilter) return false;
+        if (drillFilter && w[drillFilter.type] !== drillFilter.value) return false;
         return true;
       })
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [wines, search, colorFilter, statusFilter]);
+  }, [wines, search, colorFilter, statusFilter, drillFilter]);
 
   const stats = useMemo(() => {
     if (!wines) return null;
@@ -142,14 +156,18 @@ function CellarApp() {
     const totalValue = active.reduce((s, w) => s + w.pricePerBottle * w.qty, 0);
     const byColor = {};
     const byStatus = { ready: 0, cellaring: 0, overdue: 0, unknown: 0 };
+    const byCountry = {};
+    const byRegion = {};
     active.forEach((w) => {
       const c = classify(w.variety);
       byColor[c] = (byColor[c] || 0) + w.qty;
       byStatus[parseDrinkWindow(w.cellarRaw).status] += w.qty;
+      if (w.country) byCountry[w.country] = (byCountry[w.country] || 0) + w.qty;
+      if (w.region) byRegion[w.region] = (byRegion[w.region] || 0) + w.qty;
     });
     const rated = active.filter((w) => w.rating && /^\d+/.test(w.rating));
     const avgRating = rated.length ? (rated.reduce((s, w) => s + parseInt(w.rating), 0) / rated.length).toFixed(1) : null;
-    return { totalBottles, totalValue, byColor, byStatus, avgRating, distinctLabels: active.length };
+    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, avgRating, distinctLabels: active.length };
   }, [wines]);
 
   function updateQty(wine, delta) {
@@ -228,6 +246,13 @@ function CellarApp() {
             <Icon name="search" size={16} />
             <input className="search-input" placeholder="Search label or variety" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
+
+          {drillFilter && (
+            <div className="drill-chip">
+              <span>{drillFilter.type === "country" ? "Country" : "Region"}: {drillFilter.value}</span>
+              <button onClick={() => setDrillFilter(null)} aria-label="Clear filter">×</button>
+            </div>
+          )}
 
           <div className="chip-row">
             {["All", "Red", "White", "Rosé", "Sparkling"].map((c) => (
@@ -344,6 +369,28 @@ function CellarApp() {
                 <div className="bar-row-value">{stats.byStatus[k]}</div>
               </div>
             ))}
+          </div>
+          <div className="section-title">By country</div>
+          <div className="bar-list">
+            {Object.entries(stats.byCountry).sort((a,b) => b[1]-a[1]).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "country", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
+            ))}
+            {Object.keys(stats.byCountry).length === 0 && <p className="sync-note">No country data recorded yet.</p>}
+          </div>
+          <div className="section-title">Top regions</div>
+          <div className="bar-list">
+            {Object.entries(stats.byRegion).sort((a,b) => b[1]-a[1]).slice(0,8).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "region", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
+            ))}
+            {Object.keys(stats.byRegion).length === 0 && <p className="sync-note">No region data recorded yet.</p>}
           </div>
           <button className="btn btn-secondary" style={{ width: "100%", marginTop: "1.5rem" }} onClick={exportCsv}>Export cellar as CSV</button>
         </div>
@@ -467,6 +514,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
 .search-input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 14px; width: 100%; font-family: 'Inter', sans-serif; }
 .search-input::placeholder { color: var(--text-muted); }
 .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.drill-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface-raised); border: 1px solid var(--brass); border-radius: 10px; padding: 7px 10px; margin-bottom: 8px; font-size: 12px; color: var(--brass); }
+.drill-chip button { background: none; border: none; color: var(--brass); cursor: pointer; font-size: 16px; line-height: 1; }
 .chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-family: 'Inter', sans-serif; cursor: pointer; }
 .chip-active { background: var(--claret); border-color: var(--claret); color: #F3E4E7; }
 .chip-status.chip-active { background: var(--brass); border-color: var(--brass); color: #2A2010; }
@@ -523,7 +572,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
 .stat-value { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; margin-top: 4px; }
 .bar-list { display: flex; flex-direction: column; gap: 8px; }
 .bar-row { display: flex; align-items: center; gap: 8px; }
-.bar-row-label { font-size: 12px; color: var(--text-secondary); width: 88px; flex-shrink: 0; }
+.bar-row-clickable { width: 100%; background: none; border: none; padding: 4px 0; cursor: pointer; font-family: inherit; text-align: left; }
+.bar-row-clickable:hover .bar-row-label { color: var(--brass); }
+.bar-row-label { font-size: 12px; color: var(--text-secondary); width: 108px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sync-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 .bar-track { flex: 1; height: 8px; background: var(--surface-raised); border-radius: 4px; overflow: hidden; }
 .bar-fill { height: 100%; background: var(--brass); border-radius: 4px; }
 .bar-row-value { font-size: 12px; width: 24px; text-align: right; }
