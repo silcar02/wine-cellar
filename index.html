@@ -12,7 +12,596 @@
 html, body { margin: 0; padding: 0; background: #0F0C09; }
 body { display: flex; justify-content: center; padding: 24px 12px; min-height: 100vh; box-sizing: border-box; }
 #root { width: 100%; max-width: 460px; }
+</style><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My cellar</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+html, body { margin: 0; padding: 0; background: #0F0C09; }
+body { display: flex; justify-content: center; padding: 24px 12px; min-height: 100vh; box-sizing: border-box; }
+#root { width: 100%; max-width: 460px; }
 </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+
+const { useState, useEffect, useMemo } = React;
+
+const RAW_WINES = [{"id": 1, "label": "1847 First Pick", "variety": "Shiraz", "vintage": "2018", "rating": "94", "qty": 3, "cellarRaw": "2042", "fridge": "Middle", "shelf": "Shelf 3 Row 1", "box": "22", "pricePerBottle": "480", "totalPrice": "1440", "region": "Barossa Valley", "country": "Australia"}, {"id": 2, "label": "ABEL'S TEMPEST", "variety": "Pinot Noir", "vintage": "2012", "rating": "", "qty": 4, "cellarRaw": "2020", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "32", "totalPrice": "128", "region": "Tasmania", "country": "Australia"}, {"id": 3, "label": "Allegiance Wines", "variety": "Unity Barossa Valley Shiraz", "vintage": "2021", "rating": "90", "qty": 1, "cellarRaw": "2035", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "100", "totalPrice": "100", "region": "Barossa Valley", "country": "Australia"}, {"id": 4, "label": "Arila Gardens", "variety": "Ironstone and Quartz Garden Shiraz", "vintage": "2022", "rating": "95", "qty": 1, "cellarRaw": "2035", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "90", "totalPrice": "90", "region": "McLaren Vale", "country": "Australia"}, {"id": 5, "label": "Bay Of Fires", "variety": "Pinot Noir", "vintage": "2022", "rating": "94", "qty": 6, "cellarRaw": "2034", "fridge": "Right", "shelf": "Shelf 4 Row 3&Front", "box": "", "pricePerBottle": "45", "totalPrice": "270", "region": "Tasmania", "country": "Australia"}, {"id": 6, "label": "Bay Of Fires", "variety": "Pinot Noir", "vintage": "2021", "rating": "93", "qty": 5, "cellarRaw": "2031", "fridge": "Left", "shelf": "Shelf 2 Row 1", "box": "", "pricePerBottle": "40", "totalPrice": "200", "region": "Tasmania", "country": "Australia"}, {"id": 7, "label": "BEN HAINES", "variety": "Malakoff Vineyard Syrah", "vintage": "2012", "rating": "", "qty": 1, "cellarRaw": "2027", "fridge": "Middle", "shelf": "Shelf 3 Row 2", "box": "2", "pricePerBottle": "90", "totalPrice": "90", "region": "Pyrenees", "country": "Australia"}, {"id": 8, "label": "Bests Great Western", "variety": "Cabernet Sauvignon", "vintage": "2021", "rating": "95", "qty": 1, "cellarRaw": "2034", "fridge": "Left", "shelf": "Shelf 1 Row 3", "box": "", "pricePerBottle": "25", "totalPrice": "25", "region": "Grampians", "country": "Australia"}, {"id": 9, "label": "Bleasdale", "variety": "The Powder Monkey Shiraz", "vintage": "2021", "rating": "", "qty": 1, "cellarRaw": "2041", "fridge": "Right", "shelf": "Shelf 1 Row 2", "box": "", "pricePerBottle": "89", "totalPrice": "89", "region": "Langhorne Creek", "country": "Australia"}, {"id": 10, "label": "Bleasdale", "variety": "Old Vine Shiraz", "vintage": "2021", "rating": "96", "qty": 1, "cellarRaw": "2040", "fridge": "Right", "shelf": "Bottom Row 1", "box": "", "pricePerBottle": "69", "totalPrice": "69", "region": "Langhorne Creek", "country": "Australia"}, {"id": 11, "label": "Bleasdale", "variety": "Generations Shiraz", "vintage": "2022", "rating": "94", "qty": 1, "cellarRaw": "2040", "fridge": "Left", "shelf": "Shelf 3 Row 3", "box": "", "pricePerBottle": "39", "totalPrice": "39", "region": "Langhorne Creek", "country": "Australia"}, {"id": 12, "label": "Bleasdale", "variety": "Frank Potts Cabernet Sauvignon, Malbec, Merlot, Petit Verdot, Cabernet Franc", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2041", "fridge": "Left", "shelf": "Shelf 3 Row 3", "box": "", "pricePerBottle": "39", "totalPrice": "39", "region": "Langhorne Creek", "country": "Australia"}, {"id": 13, "label": "Bleasdale", "variety": "Generations Malbec", "vintage": "2022", "rating": "96", "qty": 1, "cellarRaw": "2040", "fridge": "Left", "shelf": "Shelf 2 Row 2", "box": "", "pricePerBottle": "39", "totalPrice": "39", "region": "Langhorne Creek", "country": "Australia"}, {"id": 14, "label": "Bleasdale", "variety": "Wellington Road GSM", "vintage": "2022", "rating": "94", "qty": 1, "cellarRaw": "2032", "fridge": "Left", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "35", "totalPrice": "35", "region": "Langhorne Creek", "country": "Australia"}, {"id": 15, "label": "Bleasdale", "variety": "Grenache", "vintage": "2022", "rating": "95", "qty": 1, "cellarRaw": "2032", "fridge": "Left", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "30", "totalPrice": "30", "region": "Langhorne Creek", "country": "Australia"}, {"id": 16, "label": "BRAND & SONS", "variety": "Sanctuary Cab Sav", "vintage": "2018", "rating": "", "qty": 1, "cellarRaw": "2033", "fridge": "Middle", "shelf": "Shelf 3 Row 1", "box": "19", "pricePerBottle": "150", "totalPrice": "150", "region": "Coonawarra", "country": "Australia"}, {"id": 17, "label": "CAMPBELLS", "variety": "Bobbie Burns Shiraz", "vintage": "2019", "rating": "", "qty": 6, "cellarRaw": "2031", "fridge": "Left", "shelf": "Shelf 2 Row 3", "box": "22", "pricePerBottle": "26", "totalPrice": "156", "region": "Rutherglen", "country": "Australia"}, {"id": 18, "label": "CASTELLO DI GABBIANO", "variety": "alleanza toscana IGT", "vintage": "2010", "rating": "", "qty": 5, "cellarRaw": "2023", "fridge": "Right", "shelf": "Bottom Row 1&2", "box": "8", "pricePerBottle": "50", "totalPrice": "250", "region": "Tuscany", "country": "Italy"}, {"id": 19, "label": "Chalk Hill", "variety": "Alpha Crucis Sirius Shiraz", "vintage": "2022", "rating": "95", "qty": 1, "cellarRaw": "2034", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "150", "totalPrice": "150", "region": "McLaren Vale", "country": "Australia"}, {"id": 20, "label": "CHÂTEAU LAFON-ROCHET", "variety": "Saint-Estephe", "vintage": "2012", "rating": "90 Decanter", "qty": 7, "cellarRaw": "2017-2021", "fridge": "Right", "shelf": "Shelf 5 Row 1", "box": "4", "pricePerBottle": "100", "totalPrice": "700", "region": "Saint-Estèphe, Bordeaux", "country": "France"}, {"id": 21, "label": "CHÂTEAU TANUNDA", "variety": "50 year old vines Cab Sav", "vintage": "2017", "rating": "96", "qty": 6, "cellarRaw": "2047", "fridge": "Middle", "shelf": "Shelf 4 Row 1", "box": "20", "pricePerBottle": "80", "totalPrice": "480", "region": "Barossa Valley", "country": "Australia"}, {"id": 22, "label": "CLARENDON HILLS", "variety": "Hickinbotham Syrah", "vintage": "2013", "rating": "96", "qty": 1, "cellarRaw": "2035", "fridge": "Right", "shelf": "Shelf 3 Row 3", "box": "9", "pricePerBottle": "90", "totalPrice": "90", "region": "McLaren Vale", "country": "Australia"}, {"id": 23, "label": "COLDSTREAM HILLS", "variety": "Deer Farm Pinot Noir", "vintage": "2022", "rating": "96", "qty": 1, "cellarRaw": "2034", "fridge": "Right", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "50", "totalPrice": "50", "region": "Yarra Valley", "country": "Australia"}, {"id": 24, "label": "COLDSTREAM HILLS", "variety": "Pinot Noir", "vintage": "2023", "rating": "95", "qty": 1, "cellarRaw": "2031", "fridge": "Left", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "35", "totalPrice": "35", "region": "Yarra Valley", "country": "Australia"}, {"id": 25, "label": "COLDSTREAM HILLS", "variety": "Yarra Valley Pinot Noir", "vintage": "2016", "rating": "", "qty": 6, "cellarRaw": "2023", "fridge": "Box", "shelf": "Box", "box": "4", "pricePerBottle": "27", "totalPrice": "162", "region": "Yarra Valley", "country": "Australia"}, {"id": 26, "label": "Curtis Martins Vineyard", "variety": "Limited Shiraz", "vintage": "2020", "rating": "95", "qty": 6, "cellarRaw": "2040", "fridge": "Right", "shelf": "Shelf 1 Row 1", "box": "23", "pricePerBottle": "99", "totalPrice": "594", "region": "South Australia", "country": "Australia"}, {"id": 27, "label": "Curtis Martins Vineyard", "variety": "Limited Shiraz", "vintage": "2020", "rating": "95", "qty": 1, "cellarRaw": "2040", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "99", "totalPrice": "99", "region": "South Australia", "country": "Australia"}, {"id": 28, "label": "DALWHINNIE", "variety": "Moonambel Shiraz", "vintage": "2006", "rating": "95", "qty": 1, "cellarRaw": "2018", "fridge": "Right", "shelf": "Shelf 2 Row 3", "box": "6", "pricePerBottle": "75", "totalPrice": "75", "region": "Pyrenees", "country": "Australia"}, {"id": 29, "label": "DE LULIIS STEVEN VINEYARD", "variety": "Hunter Valley Shiraz", "vintage": "2013", "rating": "", "qty": 1, "cellarRaw": "2023", "fridge": "Left", "shelf": "Bottom Row 1", "box": "6", "pricePerBottle": "40", "totalPrice": "40", "region": "Hunter Valley", "country": "Australia"}, {"id": 30, "label": "DEVIL'S LAIR", "variety": "Margaret River Cabernet Sauvignon", "vintage": "2023", "rating": "98", "qty": 6, "cellarRaw": "2038", "fridge": "Right", "shelf": "Shelf 5 Row 3&Front", "box": "", "pricePerBottle": "50", "totalPrice": "300", "region": "Margaret River", "country": "Australia"}, {"id": 31, "label": "EPIC NEGOCIANTS", "variety": "Semaphore McLaren Vale Shiraz", "vintage": "2017", "rating": "", "qty": 6, "cellarRaw": "2022", "fridge": "Left", "shelf": "Shelf 6 Row 1", "box": "6", "pricePerBottle": "40", "totalPrice": "240", "region": "McLaren Vale", "country": "Australia"}, {"id": 32, "label": "Giant Steps", "variety": "Syrah Carignan Grenache", "vintage": "2019", "rating": "95", "qty": 1, "cellarRaw": "2027", "fridge": "Left", "shelf": "Shelf 4 Row 2", "box": "", "pricePerBottle": "38", "totalPrice": "38", "region": "Yarra Valley", "country": "Australia"}, {"id": 33, "label": "Golden Amrita", "variety": "Barossa Single Estate Shiraz", "vintage": "2019", "rating": "", "qty": 1, "cellarRaw": "2036", "fridge": "Left", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "158", "totalPrice": "158", "region": "Barossa Valley", "country": "Australia"}, {"id": 34, "label": "GRANT BURGE", "variety": "Shadrach Cab Sav", "vintage": "2012", "rating": "97", "qty": 4, "cellarRaw": "2034", "fridge": "Middle", "shelf": "Shelf 3 Row 2", "box": "", "pricePerBottle": "115", "totalPrice": "460", "region": "Barossa Valley", "country": "Australia"}, {"id": 35, "label": "GRANT BURGE", "variety": "Shadrach Cab Sav", "vintage": "2002", "rating": "", "qty": 10, "cellarRaw": "2018", "fridge": "Middle", "shelf": "Shelf 6 Row 1&2", "box": "12", "pricePerBottle": "62", "totalPrice": "620", "region": "Barossa Valley", "country": "Australia"}, {"id": 36, "label": "GRANT BURGE", "variety": "Filsell", "vintage": "2019", "rating": "", "qty": 6, "cellarRaw": "2030", "fridge": "Middle", "shelf": "Shelf 2 Row 3", "box": "18", "pricePerBottle": "45", "totalPrice": "270", "region": "Barossa Valley", "country": "Australia"}, {"id": 37, "label": "GRANT BURGE", "variety": "The Holy Trinity GSM", "vintage": "2018", "rating": "95", "qty": 6, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 5 Row 1", "box": "19", "pricePerBottle": "40", "totalPrice": "240", "region": "Barossa Valley", "country": "Australia"}, {"id": 38, "label": "HANGING ROCK", "variety": "Heathcote Shiraz", "vintage": "2005", "rating": "", "qty": 3, "cellarRaw": "2015-21", "fridge": "Right", "shelf": "Shelf 5 Row 2", "box": "11", "pricePerBottle": "70", "totalPrice": "210", "region": "Heathcote", "country": "Australia"}, {"id": 39, "label": "HEATHCOTE WINERY", "variety": "Curagee Shiraz", "vintage": "2007", "rating": "", "qty": 1, "cellarRaw": "2021", "fridge": "Right", "shelf": "Shelf 5 Row 3", "box": "2", "pricePerBottle": "55", "totalPrice": "55", "region": "Heathcote", "country": "Australia"}, {"id": 40, "label": "Heirloom", "variety": "Alcala McLaren Vale Grenache", "vintage": "2024", "rating": "96", "qty": 3, "cellarRaw": "2034", "fridge": "Right", "shelf": "Shelf 2 Row 3", "box": "", "pricePerBottle": "80", "totalPrice": "240", "region": "Barossa Valley", "country": "Australia"}, {"id": 41, "label": "Heirloom", "variety": "McLaren Vale Shiraz", "vintage": "2020", "rating": "96", "qty": 1, "cellarRaw": "2040", "fridge": "Left", "shelf": "Shelf 2 Row 2", "box": "", "pricePerBottle": "40", "totalPrice": "40", "region": "Barossa Valley", "country": "Australia"}, {"id": 42, "label": "HENSCHKE", "variety": "Hill of Grace Shiraz", "vintage": "2001", "rating": "96", "qty": 2, "cellarRaw": "2009-13+21", "fridge": "Middle", "shelf": "Shelf 2 Row 1", "box": "1", "pricePerBottle": "1200", "totalPrice": "2400", "region": "Eden Valley", "country": "Australia"}, {"id": 43, "label": "HENSCHKE", "variety": "Mt Edelstone Shiraz", "vintage": "2003", "rating": "95", "qty": 1, "cellarRaw": "2015-23+", "fridge": "Middle", "shelf": "Shelf 3 Row 3", "box": "1", "pricePerBottle": "350", "totalPrice": "350", "region": "Eden Valley", "country": "Australia"}, {"id": 44, "label": "HENSCHKE", "variety": "Cyril Henschke Cab Sav", "vintage": "2002", "rating": "96", "qty": 1, "cellarRaw": "2014-22", "fridge": "Middle", "shelf": "Shelf 3 Row 1", "box": "1", "pricePerBottle": "220", "totalPrice": "220", "region": "Eden Valley", "country": "Australia"}, {"id": 45, "label": "HENSCHKE", "variety": "Tappa Pass Shiraz", "vintage": "2002", "rating": "95", "qty": 1, "cellarRaw": "2022", "fridge": "Middle", "shelf": "Shelf 3 Row 2", "box": "2", "pricePerBottle": "129", "totalPrice": "129", "region": "Eden Valley", "country": "Australia"}, {"id": 46, "label": "HENSCHKE", "variety": "Keyneton Estate Euphonium Shiraz", "vintage": "2002", "rating": "95", "qty": 1, "cellarRaw": "2014-22+", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "2", "pricePerBottle": "90", "totalPrice": "90", "region": "Eden Valley", "country": "Australia"}, {"id": 47, "label": "Hewitson", "variety": "CASK 66 Shiraz", "vintage": "2024", "rating": "", "qty": 6, "cellarRaw": "2044", "fridge": "Right", "shelf": "Shelf 2 Row 1", "box": "", "pricePerBottle": "450", "totalPrice": "2700", "region": "Barossa Valley", "country": "Australia"}, {"id": 48, "label": "Hither and Yon", "variety": "Leask Grenache", "vintage": "2020", "rating": "97", "qty": 1, "cellarRaw": "2037", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "100", "totalPrice": "100", "region": "McLaren Vale", "country": "Australia"}, {"id": 49, "label": "HOUGHTON CW FERGUSON", "variety": "Cabernet Malbec", "vintage": "2020", "rating": "98", "qty": 6, "cellarRaw": "2040", "fridge": "Middle", "shelf": "Shelf 4 Row 2", "box": "", "pricePerBottle": "78", "totalPrice": "468", "region": "Great Southern", "country": "Australia"}, {"id": 50, "label": "HOUGHTON CW FERGUSON", "variety": "Cabernet Malbec", "vintage": "2012", "rating": "96", "qty": 1, "cellarRaw": "2027", "fridge": "Right", "shelf": "Shelf 2 Row 3", "box": "6", "pricePerBottle": "75", "totalPrice": "75", "region": "Great Southern", "country": "Australia"}, {"id": 51, "label": "HOUGHTON CW FERGUSON", "variety": "Cabernet Malbec", "vintage": "2016", "rating": "97", "qty": 6, "cellarRaw": "2031", "fridge": "Middle", "shelf": "Shelf 5 Row 1", "box": "18", "pricePerBottle": "75", "totalPrice": "450", "region": "Great Southern", "country": "Australia"}, {"id": 52, "label": "HOUGHTON Jack Mann", "variety": "Cabernet Sauvignon", "vintage": "2021", "rating": "98", "qty": 3, "cellarRaw": "2045", "fridge": "Right", "shelf": "Shelf 3 Row 1", "box": "", "pricePerBottle": "160", "totalPrice": "480", "region": "Western Australia", "country": "Australia"}, {"id": 53, "label": "Jack West", "variety": "GSM", "vintage": "2020", "rating": "", "qty": 1, "cellarRaw": "2027", "fridge": "Left", "shelf": "Shelf 3 Row 3", "box": "21", "pricePerBottle": "25", "totalPrice": "25", "region": "McLaren Vale", "country": "Australia"}, {"id": 54, "label": "JACOB'S CREEK", "variety": "St Hugo Shiraz Cab Sav", "vintage": "2010", "rating": "92", "qty": 1, "cellarRaw": "2020", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "35", "totalPrice": "35", "region": "Barossa Valley", "country": "Australia"}, {"id": 55, "label": "JACOB'S CREEK", "variety": "St Hugo Cab Sav", "vintage": "2010", "rating": "94", "qty": 1, "cellarRaw": "2020", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "30", "totalPrice": "30", "region": "Barossa Valley", "country": "Australia"}, {"id": 56, "label": "Katnook Estate", "variety": "Odyssey", "vintage": "2022", "rating": "96", "qty": 6, "cellarRaw": "2038", "fridge": "Right", "shelf": "Shelf 2 Row 2", "box": "", "pricePerBottle": "85", "totalPrice": "510", "region": "Coonawarra", "country": "Australia"}, {"id": 57, "label": "KILIKANOON", "variety": "Cabernet Sauvignon", "vintage": "2001", "rating": "", "qty": 1, "cellarRaw": "2014-19", "fridge": "Box", "shelf": "Box", "box": "1", "pricePerBottle": "16", "totalPrice": "16", "region": "Clare Valley", "country": "Australia"}, {"id": 58, "label": "Knappstein", "variety": "Shiraz Clare Valley", "vintage": "2019", "rating": "", "qty": 1, "cellarRaw": "2029", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "22", "pricePerBottle": "22", "totalPrice": "22", "region": "Clare Valley", "country": "Australia"}, {"id": 59, "label": "KNOWN PLEASURES", "variety": "McLaren Vale Shiraz", "vintage": "2017", "rating": "", "qty": 1, "cellarRaw": "2027-2037", "fridge": "Right", "shelf": "Shelf 5 Row 2", "box": "9", "pricePerBottle": "60", "totalPrice": "60", "region": "McLaren Vale", "country": "Australia"}, {"id": 60, "label": "Lindeman's", "variety": "Coonawarra Trio Pyrus Cabernet Blend; Cabernet Sauvignon/ Merlot/Malbec", "vintage": "2024", "rating": "", "qty": 6, "cellarRaw": "2042", "fridge": "Right", "shelf": "Shelf 4 Row 2", "box": "", "pricePerBottle": "70", "totalPrice": "420", "region": "Coonawarra", "country": "Australia"}, {"id": 61, "label": "LITTLE GIANT", "variety": "Nebbiolo Adelaide Hills", "vintage": "2020", "rating": "92", "qty": 1, "cellarRaw": "2025", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "25", "totalPrice": "25", "region": "Adelaide Hills", "country": "Australia"}, {"id": 62, "label": "LITTLE GIANT", "variety": "McLaren Vale Grenache", "vintage": "2017", "rating": "", "qty": 3, "cellarRaw": "2023", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "23", "totalPrice": "69", "region": "Adelaide Hills", "country": "Australia"}, {"id": 63, "label": "M. Chapoutier", "variety": "Gigondas", "vintage": "2020", "rating": "", "qty": 1, "cellarRaw": "2027", "fridge": "Right", "shelf": "Bottom Row 2", "box": "21", "pricePerBottle": "50", "totalPrice": "50", "region": "Rhône Valley", "country": "France"}, {"id": 64, "label": "MAJELLA", "variety": "Cabernet", "vintage": "2004", "rating": "95", "qty": 12, "cellarRaw": "2012-16+25", "fridge": "Middle", "shelf": "Shelf 5 Row 2&3", "box": "7", "pricePerBottle": "75", "totalPrice": "900", "region": "Coonawarra", "country": "Australia"}, {"id": 65, "label": "Maretti", "variety": "Langhe Nebbiolo", "vintage": "2020", "rating": "", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 1 Row 3", "box": "22", "pricePerBottle": "26", "totalPrice": "26", "region": "Piedmont", "country": "Italy"}, {"id": 66, "label": "Margan", "variety": "Cabernet Sauvignon", "vintage": "2022", "rating": "", "qty": 1, "cellarRaw": "2032", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "22", "pricePerBottle": "50", "totalPrice": "50", "region": "Hunter Valley", "country": "Australia"}, {"id": 67, "label": "Marqués de Riscal", "variety": "Reserva Rioja", "vintage": "2016", "rating": "", "qty": 1, "cellarRaw": "2027", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "21", "pricePerBottle": "35", "totalPrice": "35", "region": "Rioja", "country": "Spain"}, {"id": 68, "label": "MAYFORD", "variety": "Porepunkah Tempranillo", "vintage": "2021", "rating": "96", "qty": 3, "cellarRaw": "2033", "fridge": "Left", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "44", "totalPrice": "132", "region": "Alpine Valleys", "country": "Australia"}, {"id": 69, "label": "Mistletoe", "variety": "Reserve Shiraz", "vintage": "2021", "rating": "95", "qty": 10, "cellarRaw": "2045", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "35", "totalPrice": "350", "region": "Hunter Valley", "country": "Australia"}, {"id": 70, "label": "Mistletoe", "variety": "Home vineyard Shiraz", "vintage": "2021", "rating": "97", "qty": 11, "cellarRaw": "2073", "fridge": "Left", "shelf": "Shelf 3 Row 2", "box": "", "pricePerBottle": "27", "totalPrice": "297", "region": "Hunter Valley", "country": "Australia"}, {"id": 71, "label": "Mitolo", "variety": "Scylla Nero d'Avola", "vintage": "2024", "rating": "94", "qty": 5, "cellarRaw": "2031+", "fridge": "Right", "shelf": "Shelf 2 Row 1", "box": "", "pricePerBottle": "42", "totalPrice": "210", "region": "McLaren Vale", "country": "Australia"}, {"id": 72, "label": "Moss Brothers", "variety": "Fidium Cabernet Sauvignon", "vintage": "2022", "rating": "", "qty": 1, "cellarRaw": "2039", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "", "pricePerBottle": "50", "totalPrice": "50", "region": "Margaret River", "country": "Australia"}, {"id": 73, "label": "Mount Pleasant", "variety": "Hunter Valley Rosehill Shiraz", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2056", "fridge": "Right", "shelf": "Shelf 4 Row 2", "box": "", "pricePerBottle": "55", "totalPrice": "55", "region": "Hunter Valley", "country": "Australia"}, {"id": 74, "label": "Mount Pleasant", "variety": "Old Paddock and Old Hill Shiraz", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2056", "fridge": "Right", "shelf": "Shelf 5 Row 3", "box": "", "pricePerBottle": "55", "totalPrice": "55", "region": "Hunter Valley", "country": "Australia"}, {"id": 75, "label": "NUITS-SAINT GEORGES", "variety": "La Belle Voisine", "vintage": "2007", "rating": "", "qty": 3, "cellarRaw": "2014-23", "fridge": "Right", "shelf": "Bottom Row 1", "box": "2", "pricePerBottle": "65", "totalPrice": "195", "region": "Côte de Nuits, Burgundy", "country": "France"}, {"id": 76, "label": "PENFOLDS", "variety": "Grange", "vintage": "2004", "rating": "98", "qty": 2, "cellarRaw": "2054", "fridge": "Middle", "shelf": "Shelf 2 Row 1", "box": "16", "pricePerBottle": "900", "totalPrice": "1800", "region": "South Australia", "country": "Australia"}, {"id": 77, "label": "PENFOLDS", "variety": "Bin 707", "vintage": "2006", "rating": "96", "qty": 1, "cellarRaw": "2035", "fridge": "Middle", "shelf": "Shelf 2 Row 1", "box": "16", "pricePerBottle": "800", "totalPrice": "800", "region": "South Australia", "country": "Australia"}, {"id": 78, "label": "PENFOLDS", "variety": "Bin 707", "vintage": "2005", "rating": "95", "qty": 1, "cellarRaw": "2032", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "16", "pricePerBottle": "600", "totalPrice": "600", "region": "South Australia", "country": "Australia"}, {"id": 79, "label": "PENFOLDS", "variety": "Mag RWT", "vintage": "2003", "rating": "95", "qty": 1, "cellarRaw": "2018", "fridge": "Middle", "shelf": "Shelf 1 Rear", "box": "11", "pricePerBottle": "350", "totalPrice": "350", "region": "South Australia", "country": "Australia"}, {"id": 80, "label": "PENFOLDS", "variety": "RWT", "vintage": "2006", "rating": "96", "qty": 2, "cellarRaw": "2036", "fridge": "Middle", "shelf": "Shelf 1 Row 1", "box": "16", "pricePerBottle": "210", "totalPrice": "420", "region": "South Australia", "country": "Australia"}, {"id": 81, "label": "PENFOLDS", "variety": "RWT", "vintage": "1997", "rating": "94", "qty": 1, "cellarRaw": "2015", "fridge": "Middle", "shelf": "Shelf 1 Row 1", "box": "12", "pricePerBottle": "190", "totalPrice": "190", "region": "South Australia", "country": "Australia"}, {"id": 82, "label": "PENFOLDS", "variety": "RWT", "vintage": "2005", "rating": "94", "qty": 6, "cellarRaw": "2030", "fridge": "Middle", "shelf": "Shelf 1 Row 1", "box": "11", "pricePerBottle": "185", "totalPrice": "1110", "region": "South Australia", "country": "Australia"}, {"id": 83, "label": "PENFOLDS", "variety": "Magill Estate", "vintage": "2006", "rating": "", "qty": 1, "cellarRaw": "2030", "fridge": "Middle", "shelf": "Shelf 1 Row 1", "box": "16", "pricePerBottle": "167", "totalPrice": "167", "region": "South Australia", "country": "Australia"}, {"id": 84, "label": "PENFOLDS", "variety": "St Henri", "vintage": "2005", "rating": "94", "qty": 1, "cellarRaw": "2030", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "16", "pricePerBottle": "140", "totalPrice": "140", "region": "South Australia", "country": "Australia"}, {"id": 85, "label": "PENFOLDS", "variety": "Cab Shiraz Bin 389", "vintage": "2000", "rating": "92", "qty": 1, "cellarRaw": "2009-15", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "7", "pricePerBottle": "140", "totalPrice": "140", "region": "South Australia", "country": "Australia"}, {"id": 86, "label": "PENFOLDS", "variety": "Magill Estate", "vintage": "2005", "rating": "93", "qty": 1, "cellarRaw": "2022", "fridge": "Middle", "shelf": "Shelf 1 Row 2", "box": "16", "pricePerBottle": "135", "totalPrice": "135", "region": "South Australia", "country": "Australia"}, {"id": 87, "label": "PENFOLDS", "variety": "Bin 28", "vintage": "2009", "rating": "94", "qty": 1, "cellarRaw": "2014-22", "fridge": "Right", "shelf": "Shelf 1 Row 3", "box": "2", "pricePerBottle": "60", "totalPrice": "60", "region": "South Australia", "country": "Australia"}, {"id": 88, "label": "PENFOLDS", "variety": "Bin 28 Shiraz", "vintage": "2021", "rating": "92", "qty": 1, "cellarRaw": "2038", "fridge": "Right", "shelf": "Shelf 2 Front", "box": "", "pricePerBottle": "50", "totalPrice": "50", "region": "South Australia", "country": "Australia"}, {"id": 89, "label": "PENFOLDS", "variety": "Koonunga Hill Shiraz Cab Sav 76", "vintage": "2010", "rating": "92", "qty": 1, "cellarRaw": "2020", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "25", "totalPrice": "25", "region": "South Australia", "country": "Australia"}, {"id": 90, "label": "Penley Estate", "variety": "Helios Cabernet Sauvignon", "vintage": "2021", "rating": "96", "qty": 1, "cellarRaw": "2050", "fridge": "Middle", "shelf": "Shelf 1 Row 1", "box": "", "pricePerBottle": "150", "totalPrice": "150", "region": "Coonawarra", "country": "Australia"}, {"id": 91, "label": "Peter Drayton", "variety": "Anomaly Tempranillo", "vintage": "2020", "rating": "", "qty": 1, "cellarRaw": "2025", "fridge": "Left", "shelf": "Shelf 4 Front", "box": "21", "pricePerBottle": "36", "totalPrice": "36", "region": "Hunter Valley", "country": "Australia"}, {"id": 92, "label": "RED EDGE", "variety": "Shiraz", "vintage": "2004", "rating": "96", "qty": 2, "cellarRaw": "2020", "fridge": "Middle", "shelf": "Shelf 6 Row 2", "box": "1", "pricePerBottle": "50", "totalPrice": "100", "region": "Heathcote", "country": "Australia"}, {"id": 93, "label": "Reschke", "variety": "Armenta Cabernet Sauvignon", "vintage": "2016", "rating": "", "qty": 1, "cellarRaw": "2033", "fridge": "Left", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "120", "totalPrice": "120", "region": "Coonawarra", "country": "Australia"}, {"id": 94, "label": "Reschke", "variety": "Armenta Cabernet Sauvignon", "vintage": "2020", "rating": "92", "qty": 3, "cellarRaw": "2036", "fridge": "Right", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "120", "totalPrice": "360", "region": "Coonawarra", "country": "Australia"}, {"id": 95, "label": "Reschke", "variety": "Vitulus Shiraz", "vintage": "2021", "rating": "95", "qty": 1, "cellarRaw": "2034", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "", "pricePerBottle": "30", "totalPrice": "30", "region": "Coonawarra", "country": "Australia"}, {"id": 96, "label": "REYNELLA", "variety": "Grenache", "vintage": "2021", "rating": "93", "qty": 5, "cellarRaw": "2028", "fridge": "Middle", "shelf": "Bottom Row 1", "box": "", "pricePerBottle": "73", "totalPrice": "365", "region": "McLaren Vale", "country": "Australia"}, {"id": 97, "label": "REYNELLA", "variety": "Basket Pressed Cabernet Sauvignon", "vintage": "2016", "rating": "96", "qty": 1, "cellarRaw": "2029", "fridge": "Middle", "shelf": "Shelf 4 Front", "box": "", "pricePerBottle": "60", "totalPrice": "60", "region": "McLaren Vale", "country": "Australia"}, {"id": 98, "label": "Rolf Binder", "variety": "Heinrich Shiraz Mataro Grenache", "vintage": "2018", "rating": "94", "qty": 6, "cellarRaw": "2026", "fridge": "Box", "shelf": "Box", "box": "4", "pricePerBottle": "28", "totalPrice": "168", "region": "Barossa Valley", "country": "Australia"}, {"id": 99, "label": "Rolf Binder (Veritas)", "variety": "Bull's Blood Shiraz Mataro Pressings", "vintage": "2020", "rating": "94", "qty": 6, "cellarRaw": "2033", "fridge": "Middle", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "60", "totalPrice": "360", "region": "Barossa Valley", "country": "Australia"}, {"id": 100, "label": "RUSTY MUTT", "variety": "Rusty Ox GSM", "vintage": "2018", "rating": "95", "qty": 6, "cellarRaw": "2025", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "30", "totalPrice": "180", "region": "Barossa Valley", "country": "Australia"}, {"id": 101, "label": "SALTRAM", "variety": "Mamre Brook Barossa Cabernet Sauvignon", "vintage": "2022", "rating": "92", "qty": 1, "cellarRaw": "2035", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "", "pricePerBottle": "38", "totalPrice": "38", "region": "Barossa Valley", "country": "Australia"}, {"id": 102, "label": "SAN MARZANO", "variety": "Collezione Cinquanta+3", "vintage": "2012", "rating": "96 Decanter", "qty": 5, "cellarRaw": "2022", "fridge": "Left", "shelf": "Bottom Row 1", "box": "17", "pricePerBottle": "42", "totalPrice": "210", "region": "Puglia", "country": "Italy"}, {"id": 103, "label": "Schild Estate", "variety": "Ben Schild Shiraz", "vintage": "2021", "rating": "", "qty": 1, "cellarRaw": "2034", "fridge": "Left", "shelf": "Shelf 2 Row 1", "box": "", "pricePerBottle": "40", "totalPrice": "40", "region": "Barossa Valley", "country": "Australia"}, {"id": 104, "label": "Schoolhouse Wines", "variety": "Coonawarra Shiraz", "vintage": "2019", "rating": "95", "qty": 2, "cellarRaw": "2037", "fridge": "Right", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "80", "totalPrice": "160", "region": "Coonawarra", "country": "Australia"}, {"id": 105, "label": "SEPPELT", "variety": "St Peters Shiraz", "vintage": "2020", "rating": "95", "qty": 1, "cellarRaw": "2050", "fridge": "Middle", "shelf": "Shelf 1 Row 3", "box": "", "pricePerBottle": "80", "totalPrice": "80", "region": "Grampians", "country": "Australia"}, {"id": 106, "label": "SEPPELT", "variety": "Mount Ida Heathcote Shiraz", "vintage": "2017", "rating": "95", "qty": 1, "cellarRaw": "2030", "fridge": "Middle", "shelf": "Shelf 6 Row 3", "box": "18", "pricePerBottle": "47", "totalPrice": "47", "region": "Grampians", "country": "Australia"}, {"id": 107, "label": "SEPPELT", "variety": "Drumborg Vineyard Pinot Noir", "vintage": "2018", "rating": "93", "qty": 6, "cellarRaw": "2028", "fridge": "Middle", "shelf": "Shelf 4 Row 3&Front", "box": "18", "pricePerBottle": "45", "totalPrice": "270", "region": "Grampians", "country": "Australia"}, {"id": 108, "label": "SEPPELT", "variety": "Drumborg Vineyard Pinot Noir", "vintage": "2019", "rating": "96", "qty": 1, "cellarRaw": "2032", "fridge": "Middle", "shelf": "Shelf 5 Front", "box": "19", "pricePerBottle": "45", "totalPrice": "45", "region": "Grampians", "country": "Australia"}, {"id": 109, "label": "SEPPELT", "variety": "Chalambar Grampians Shiraz", "vintage": "2016", "rating": "94", "qty": 6, "cellarRaw": "2026", "fridge": "", "shelf": "", "box": "5", "pricePerBottle": "23", "totalPrice": "138", "region": "Grampians", "country": "Australia"}, {"id": 110, "label": "SEPPELT", "variety": "Chalambar Grampians Shiraz", "vintage": "2017", "rating": "", "qty": 6, "cellarRaw": "2030", "fridge": "", "shelf": "", "box": "3", "pricePerBottle": "23", "totalPrice": "138", "region": "Grampians", "country": "Australia"}, {"id": 111, "label": "SEPPELT", "variety": "Show Sparkling Shiraz", "vintage": "2008", "rating": "96", "qty": 5, "cellarRaw": "2028", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "90", "totalPrice": "450", "region": "Grampians", "country": "Australia"}, {"id": 112, "label": "Serrat", "variety": "Shiraz Viognier", "vintage": "2022", "rating": "98", "qty": 2, "cellarRaw": "2035", "fridge": "Middle", "shelf": "Shelf 3 Front", "box": "", "pricePerBottle": "50", "totalPrice": "100", "region": "Yarra Valley", "country": "Australia"}, {"id": 113, "label": "SHINGLEBACK", "variety": "Red Knot Classified GSM", "vintage": "2022", "rating": "", "qty": 5, "cellarRaw": "2032", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "22", "totalPrice": "110", "region": "McLaren Vale", "country": "Australia"}, {"id": 114, "label": "Sidewood Estate", "variety": "Shiraz", "vintage": "2019", "rating": "95", "qty": 1, "cellarRaw": "2029", "fridge": "Left", "shelf": "Shelf 4 Front", "box": "3", "pricePerBottle": "26", "totalPrice": "26", "region": "Adelaide Hills", "country": "Australia"}, {"id": 115, "label": "Sieger Estate", "variety": "Frederick Adelaide Hills Pinot Noir", "vintage": "2023", "rating": "", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "65", "totalPrice": "65", "region": "Adelaide Hills", "country": "Australia"}, {"id": 116, "label": "Sister's Run", "variety": "Epiphany Shiraz", "vintage": "2020", "rating": "91", "qty": 4, "cellarRaw": "2027", "fridge": "", "shelf": "", "box": "22", "pricePerBottle": "22.5", "totalPrice": "90", "region": "Barossa Valley", "country": "Australia"}, {"id": 117, "label": "SORBY ADAMS", "variety": "The Thing Shiraz", "vintage": "2017", "rating": "", "qty": 1, "cellarRaw": "2032", "fridge": "Right", "shelf": "Shelf 1 Rear", "box": "20", "pricePerBottle": "150", "totalPrice": "150", "region": "Eden Valley", "country": "Australia"}, {"id": 118, "label": "SORBY ADAMS", "variety": "The Thing Shiraz", "vintage": "2017", "rating": "", "qty": 1, "cellarRaw": "2032", "fridge": "Right", "shelf": "Shelf 1 Rear", "box": "", "pricePerBottle": "150", "totalPrice": "150", "region": "Eden Valley", "country": "Australia"}, {"id": 119, "label": "ST HALLETT", "variety": "Old Block Shiraz", "vintage": "2018", "rating": "95", "qty": 2, "cellarRaw": "2045", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "", "pricePerBottle": "125", "totalPrice": "250", "region": "Barossa Valley", "country": "Australia"}, {"id": 120, "label": "ST HALLETT", "variety": "Higher Earth Syrah", "vintage": "2018", "rating": "96", "qty": 6, "cellarRaw": "2030", "fridge": "Right", "shelf": "Shelf 6 Row 1", "box": "1", "pricePerBottle": "48", "totalPrice": "288", "region": "Barossa Valley", "country": "Australia"}, {"id": 121, "label": "ST HALLETT", "variety": "Blackwell Shiraz", "vintage": "2017", "rating": "97", "qty": 6, "cellarRaw": "2030", "fridge": "Right", "shelf": "Shelf 6 Row 2", "box": "19", "pricePerBottle": "45", "totalPrice": "270", "region": "Barossa Valley", "country": "Australia"}, {"id": 122, "label": "Tahbilk", "variety": "Old Vines Cabernet Shiraz", "vintage": "2018", "rating": "95", "qty": 2, "cellarRaw": "2032", "fridge": "Left", "shelf": "Shelf 6 Row 2", "box": "", "pricePerBottle": "44", "totalPrice": "88", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 123, "label": "Tahbilk", "variety": "Old Vines Cabernet Shiraz", "vintage": "2019", "rating": "94", "qty": 1, "cellarRaw": "2034", "fridge": "Right", "shelf": "Shelf 1 Rear", "box": "", "pricePerBottle": "44", "totalPrice": "44", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 124, "label": "TAYLORS", "variety": "Estate Shiraz", "vintage": "2022", "rating": "", "qty": 5, "cellarRaw": "2030", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "25", "totalPrice": "125", "region": "Clare Valley", "country": "Australia"}, {"id": 125, "label": "Terre a Terre", "variety": "Cabernet Sauvignon Shiraz Crayeres Vineyard", "vintage": "2021", "rating": "96", "qty": 1, "cellarRaw": "2041", "fridge": "Right", "shelf": "Shelf 3 Front", "box": "", "pricePerBottle": "50", "totalPrice": "50", "region": "Wrattonbully", "country": "Australia"}, {"id": 126, "label": "Thistledown", "variety": "Sands of Time Grenache Blewitt Springs", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2031", "fridge": "Right", "shelf": "Shelf 1 Row 2", "box": "", "pricePerBottle": "90", "totalPrice": "90", "region": "McLaren Vale", "country": "Australia"}, {"id": 127, "label": "Thistledown", "variety": "The Cunning Plan Shiraz", "vintage": "2022", "rating": "95", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Bottom Row 2", "box": "", "pricePerBottle": "32", "totalPrice": "32", "region": "McLaren Vale", "country": "Australia"}, {"id": 128, "label": "Torbreck", "variety": "The Steading GSM", "vintage": "2020", "rating": "94", "qty": 1, "cellarRaw": "2031", "fridge": "Left", "shelf": "Shelf 1 Row 1", "box": "21", "pricePerBottle": "40", "totalPrice": "40", "region": "Barossa Valley", "country": "Australia"}, {"id": 129, "label": "WOLF BLASS", "variety": "Black label Cabernet Sauvignon Shiraz", "vintage": "2018", "rating": "96", "qty": 1, "cellarRaw": "2043", "fridge": "Right", "shelf": "Shelf 3 Row 2", "box": "", "pricePerBottle": "130", "totalPrice": "130", "region": "Barossa Valley", "country": "Australia"}, {"id": 130, "label": "WOLF BLASS", "variety": "Black Label Cabernet Shiraz Malbec", "vintage": "2019", "rating": "95", "qty": 6, "cellarRaw": "2042", "fridge": "Right", "shelf": "Shelf 3 Row 2", "box": "", "pricePerBottle": "130", "totalPrice": "780", "region": "Barossa Valley", "country": "Australia"}, {"id": 131, "label": "WOLF BLASS", "variety": "Black label Cabernet Sauvignon Shiraz Malbec", "vintage": "2014", "rating": "", "qty": 3, "cellarRaw": "2040", "fridge": "Right", "shelf": "Shelf 3 Row 3", "box": "", "pricePerBottle": "120", "totalPrice": "360", "region": "Barossa Valley", "country": "Australia"}, {"id": 132, "label": "WOLF BLASS", "variety": "Grey Label Shiraz", "vintage": "2019", "rating": "94", "qty": 1, "cellarRaw": "2032", "fridge": "Middle", "shelf": "Shelf 2 Row 2", "box": "", "pricePerBottle": "45", "totalPrice": "45", "region": "Barossa Valley", "country": "Australia"}, {"id": 133, "label": "WOLF BLASS", "variety": "Grey Label Cabernet Sauvignon Shiraz", "vintage": "2016", "rating": "92", "qty": 1, "cellarRaw": "2032", "fridge": "Left", "shelf": "Shelf 4 Front", "box": "19", "pricePerBottle": "37", "totalPrice": "37", "region": "Barossa Valley", "country": "Australia"}, {"id": 134, "label": "WYNNS", "variety": "Black label Cabernet Sauvignon", "vintage": "1998", "rating": "94", "qty": 7, "cellarRaw": "2010-18+", "fridge": "Right", "shelf": "Shelf 1 Row 2&3", "box": "5", "pricePerBottle": "85", "totalPrice": "595", "region": "Coonawarra", "country": "Australia"}, {"id": 135, "label": "WYNNS", "variety": "Black label Cabernet Sauvignon", "vintage": "2019", "rating": "97", "qty": 1, "cellarRaw": "2040", "fridge": "Right", "shelf": "Shelf 3 Front", "box": "19", "pricePerBottle": "45", "totalPrice": "45", "region": "Coonawarra", "country": "Australia"}, {"id": 136, "label": "WYNNS", "variety": "Black label Cabernet Sauvignon", "vintage": "2021", "rating": "96", "qty": 2, "cellarRaw": "2046", "fridge": "Right", "shelf": "Shelf 6 Row 3", "box": "", "pricePerBottle": "45", "totalPrice": "90", "region": "Coonawarra", "country": "Australia"}, {"id": 137, "label": "WYNNS", "variety": "Black label Old Vines Shiraz", "vintage": "2019", "rating": "95", "qty": 1, "cellarRaw": "2035", "fridge": "Middle", "shelf": "Shelf 4 Front", "box": "", "pricePerBottle": "45", "totalPrice": "45", "region": "Coonawarra", "country": "Australia"}, {"id": 138, "label": "WYNNS", "variety": "Cabernet Sauvignon The Gables", "vintage": "2012", "rating": "", "qty": 4, "cellarRaw": "2025", "fridge": "Box", "shelf": "Box", "box": "2", "pricePerBottle": "30", "totalPrice": "120", "region": "Coonawarra", "country": "Australia"}, {"id": 139, "label": "WYNNS", "variety": "Black label Cabernet Sauvignon", "vintage": "2015", "rating": "96", "qty": 6, "cellarRaw": "2023+", "fridge": "Box", "shelf": "Box", "box": "1", "pricePerBottle": "27", "totalPrice": "162", "region": "Coonawarra", "country": "Australia"}, {"id": 140, "label": "WYNNS", "variety": "Cabernet Sauvignon The Gables", "vintage": "2016", "rating": "97", "qty": 12, "cellarRaw": "2038", "fridge": "", "shelf": "", "box": "9", "pricePerBottle": "19", "totalPrice": "228", "region": "Coonawarra", "country": "Australia"}, {"id": 141, "label": "YALUMBA", "variety": "The Signature Cabernet Sauvignon Shiraz", "vintage": "1998", "rating": "", "qty": 1, "cellarRaw": "2010-18+", "fridge": "Middle", "shelf": "Shelf 3 Row 2", "box": "1", "pricePerBottle": "109", "totalPrice": "109", "region": "Barossa Valley", "country": "Australia"}, {"id": 142, "label": "YANGARRA", "variety": "King's Wood Shiraz", "vintage": "2022", "rating": "95", "qty": 1, "cellarRaw": "2034", "fridge": "Middle", "shelf": "Shelf 5 Front", "box": "", "pricePerBottle": "60", "totalPrice": "60", "region": "McLaren Vale", "country": "Australia"}, {"id": 143, "label": "YANGARRA", "variety": "Old Vine Grenache", "vintage": "2021", "rating": "99", "qty": 6, "cellarRaw": "2041", "fridge": "Left", "shelf": "Shelf 3 Row 1", "box": "", "pricePerBottle": "45", "totalPrice": "270", "region": "McLaren Vale", "country": "Australia"}, {"id": 144, "label": "YANGARRA", "variety": "Old Vine Grenache 375ml x12", "vintage": "2021", "rating": "99", "qty": 6, "cellarRaw": "2041", "fridge": "Right", "shelf": "Mixed shelves", "box": "", "pricePerBottle": "45", "totalPrice": "270", "region": "McLaren Vale", "country": "Australia"}, {"id": 145, "label": "YANGARRA", "variety": "Old Vine Grenache", "vintage": "2023", "rating": "96", "qty": 1, "cellarRaw": "2035", "fridge": "Middle", "shelf": "Shelf 5 Row 3", "box": "", "pricePerBottle": "45", "totalPrice": "45", "region": "McLaren Vale", "country": "Australia"}, {"id": 146, "label": "YANGARRA", "variety": "Shiraz", "vintage": "2013", "rating": "96", "qty": 1, "cellarRaw": "2038", "fridge": "Left", "shelf": "Shelf 4 Row 2", "box": "6", "pricePerBottle": "38", "totalPrice": "38", "region": "McLaren Vale", "country": "Australia"}, {"id": 147, "label": "YARRA BURN", "variety": "Cabernet Sauvignon", "vintage": "1999", "rating": "", "qty": 2, "cellarRaw": "2011-19", "fridge": "Box", "shelf": "Box", "box": "1", "pricePerBottle": "24.55", "totalPrice": "49.1", "region": "Yarra Valley", "country": "Australia"}, {"id": 148, "label": "Yarra Yering", "variety": "Underhill Shiraz", "vintage": "2017", "rating": "97", "qty": 1, "cellarRaw": "2037", "fridge": "Right", "shelf": "Shelf 4 Row 1", "box": "", "pricePerBottle": "100", "totalPrice": "100", "region": "Yarra Valley", "country": "Australia"}, {"id": 149, "label": "Amisfield", "variety": "Pinot Gris", "vintage": "2021", "rating": "", "qty": 1, "cellarRaw": "2025", "fridge": "Left", "shelf": "Shelf 1 Row 3", "box": "21", "pricePerBottle": "32", "totalPrice": "32", "region": "Central Otago", "country": "New Zealand"}, {"id": 150, "label": "Bethany", "variety": "Blue Quarry Eden Valley Chardonnay", "vintage": "2021", "rating": "90", "qty": 1, "cellarRaw": "2036", "fridge": "Left", "shelf": "Shelf 4 Row 1", "box": "21", "pricePerBottle": "40", "totalPrice": "40", "region": "Barossa Valley", "country": "Australia"}, {"id": 151, "label": "Carlei", "variety": "Green Vineyards Chardonnay", "vintage": "2018", "rating": "", "qty": 1, "cellarRaw": "2025", "fridge": "Middle", "shelf": "Shelf 3 Row 3", "box": "22", "pricePerBottle": "59", "totalPrice": "59", "region": "Victoria", "country": "Australia"}, {"id": 152, "label": "Clarnette", "variety": "Riesling", "vintage": "2022", "rating": "95", "qty": 6, "cellarRaw": "2032", "fridge": "Left", "shelf": "Shelf 5 Row 2", "box": "23", "pricePerBottle": "30", "totalPrice": "180", "region": "Clare Valley", "country": "Australia"}, {"id": 153, "label": "Clos Clare", "variety": "Watervale Riesling", "vintage": "2021", "rating": "95", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 5 Row 2", "box": "20", "pricePerBottle": "30", "totalPrice": "30", "region": "Clare Valley", "country": "Australia"}, {"id": 154, "label": "Frankland Estate", "variety": "Isolation Ridge Riesling", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2042", "fridge": "Right", "shelf": "Shelf 5 Front", "box": "", "pricePerBottle": "52", "totalPrice": "52", "region": "Frankland River, Great Southern", "country": "Australia"}, {"id": 155, "label": "Garagiste Le Stagiaire", "variety": "Pinot Gris", "vintage": "2021", "rating": "95", "qty": 1, "cellarRaw": "2024", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "29", "totalPrice": "29", "region": "Adelaide Hills", "country": "Australia"}, {"id": 156, "label": "Gatt Wines", "variety": "Riesling", "vintage": "2017", "rating": "96 Decanter", "qty": 12, "cellarRaw": "2031", "fridge": "Left", "shelf": "Shelf 1 Row 2&3", "box": "23", "pricePerBottle": "35", "totalPrice": "420", "region": "Clare Valley", "country": "Australia"}, {"id": 157, "label": "Giant Steps", "variety": "Sexton Vineyard Chardonnay", "vintage": "2021", "rating": "97", "qty": 1, "cellarRaw": "2028", "fridge": "Middle", "shelf": "Shelf 3 Row 3", "box": "", "pricePerBottle": "65", "totalPrice": "65", "region": "Yarra Valley", "country": "Australia"}, {"id": 158, "label": "HARDYS", "variety": "Eileen Hardy Chardonnay", "vintage": "2022", "rating": "96", "qty": 1, "cellarRaw": "2033", "fridge": "Middle", "shelf": "Shelf 2 Front", "box": "", "pricePerBottle": "130", "totalPrice": "130", "region": "South Australia", "country": "Australia"}, {"id": 159, "label": "HARDYS", "variety": "HRB Riesling", "vintage": "2014", "rating": "97", "qty": 1, "cellarRaw": "2024", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "30", "totalPrice": "30", "region": "South Australia", "country": "Australia"}, {"id": 160, "label": "HEIRLOOM VINEYARDS", "variety": "Adelaide Hills Chardonnay", "vintage": "2014", "rating": "95", "qty": 1, "cellarRaw": "2025", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "30", "totalPrice": "30", "region": "Adelaide Hills", "country": "Australia"}, {"id": 161, "label": "HENSCHKE", "variety": "Julius Riesling", "vintage": "2005", "rating": "", "qty": 1, "cellarRaw": "2013-17", "fridge": "Right", "shelf": "Shelf 2 Front", "box": "6", "pricePerBottle": "44", "totalPrice": "44", "region": "Eden Valley", "country": "Australia"}, {"id": 162, "label": "HENSCHKE", "variety": "Peggy's Hill Riesling", "vintage": "2022", "rating": "91", "qty": 3, "cellarRaw": "2032", "fridge": "Right", "shelf": "Shelf 6 Row 3", "box": "", "pricePerBottle": "26", "totalPrice": "78", "region": "Eden Valley", "country": "Australia"}, {"id": 163, "label": "House of Arras", "variety": "Grand Vintage", "vintage": "2009", "rating": "97", "qty": 1, "cellarRaw": "2028", "fridge": "Middle", "shelf": "Shelf 2 Front", "box": "", "pricePerBottle": "95", "totalPrice": "95", "region": "Tasmania", "country": "Australia"}, {"id": 164, "label": "Knappstein", "variety": "Ackland Riesling", "vintage": "2021", "rating": "93", "qty": 1, "cellarRaw": "2031", "fridge": "Left", "shelf": "Shelf 3 Row 3", "box": "22", "pricePerBottle": "28.99", "totalPrice": "28.99", "region": "Clare Valley", "country": "Australia"}, {"id": 165, "label": "Landaire at Padthaway Estate", "variety": "Chardonnay", "vintage": "2021", "rating": "98", "qty": 6, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 5 Row 1&Front", "box": "", "pricePerBottle": "37", "totalPrice": "222", "region": "Padthaway", "country": "Australia"}, {"id": 166, "label": "Misha", "variety": "Sauvignon Blanc", "vintage": "2020", "rating": "", "qty": 1, "cellarRaw": "2026+", "fridge": "Box", "shelf": "Box", "box": "11", "pricePerBottle": "26", "totalPrice": "26", "region": "Central Otago", "country": "New Zealand"}, {"id": 167, "label": "Mistletoe", "variety": "Reserve Semillon", "vintage": "2015", "rating": "95", "qty": 11, "cellarRaw": "2035", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "30", "totalPrice": "330", "region": "Hunter Valley", "country": "Australia"}, {"id": 168, "label": "Mud House", "variety": "Pinot Gris", "vintage": "2020", "rating": "", "qty": 3, "cellarRaw": "2026+", "fridge": "Box", "shelf": "Box", "box": "1", "pricePerBottle": "15", "totalPrice": "45", "region": "Marlborough", "country": "New Zealand"}, {"id": 169, "label": "PENFOLDS", "variety": "Yattarna Chardonnay", "vintage": "2006", "rating": "96", "qty": 1, "cellarRaw": "2019", "fridge": "Middle", "shelf": "Shelf 2 Front", "box": "16", "pricePerBottle": "150", "totalPrice": "150", "region": "South Australia", "country": "Australia"}, {"id": 170, "label": "PENFOLDS", "variety": "Reserve Bin 07A Chardonnay", "vintage": "2007", "rating": "95", "qty": 1, "cellarRaw": "2017", "fridge": "Right", "shelf": "Shelf 2 Front", "box": "11", "pricePerBottle": "100", "totalPrice": "90", "region": "South Australia", "country": "Australia"}, {"id": 171, "label": "PENFOLDS", "variety": "Bin 311 Chardonnay", "vintage": "2018", "rating": "", "qty": 1, "cellarRaw": "2025", "fridge": "Middle", "shelf": "Shelf 3 Front", "box": "", "pricePerBottle": "45", "totalPrice": "45", "region": "South Australia", "country": "Australia"}, {"id": 172, "label": "PETALUMA", "variety": "Hanlin Hill Riesling", "vintage": "2021", "rating": "95", "qty": 4, "cellarRaw": "2032", "fridge": "Left", "shelf": "Shelf 2 Row 3", "box": "21", "pricePerBottle": "30", "totalPrice": "120", "region": "Clare Valley", "country": "Australia"}, {"id": 173, "label": "SEPPELT DRUMBORG", "variety": "Riesling", "vintage": "2019", "rating": "98", "qty": 5, "cellarRaw": "2039", "fridge": "Left", "shelf": "Shelf 4 Row 2&3", "box": "17", "pricePerBottle": "35", "totalPrice": "175", "region": "Henty", "country": "Australia"}, {"id": 174, "label": "SEPPELT DRUMBORG", "variety": "Riesling", "vintage": "2020", "rating": "", "qty": 6, "cellarRaw": "2040", "fridge": "Left", "shelf": "Shelf 2 Row 1&2", "box": "17", "pricePerBottle": "35", "totalPrice": "210", "region": "Henty", "country": "Australia"}, {"id": 175, "label": "SEPPELT HENTY", "variety": "Gruner Veltliner", "vintage": "2018", "rating": "95", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 5 Row 3", "box": "20", "pricePerBottle": "27", "totalPrice": "27", "region": "Henty", "country": "Australia"}, {"id": 176, "label": "SONS OF EDEN", "variety": "Cirrus Single Vineyard Riesling", "vintage": "2016", "rating": "98", "qty": 6, "cellarRaw": "2036", "fridge": "Middle", "shelf": "Shelf 1&3 Row 3", "box": "8", "pricePerBottle": "56", "totalPrice": "336", "region": "Eden Valley", "country": "Australia"}, {"id": 177, "label": "Tahbilk", "variety": "1927 Vines Marsanne", "vintage": "2015", "rating": "95", "qty": 1, "cellarRaw": "2035", "fridge": "Middle", "shelf": "Shelf 6 Row 3", "box": "", "pricePerBottle": "47", "totalPrice": "47", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 178, "label": "Tahbilk", "variety": "Marsanne", "vintage": "2017", "rating": "95", "qty": 2, "cellarRaw": "2032", "fridge": "Left", "shelf": "Shelf 5 Row 3", "box": "", "pricePerBottle": "28", "totalPrice": "56", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 179, "label": "Tahbilk", "variety": "Marsanne", "vintage": "2022", "rating": "95", "qty": 2, "cellarRaw": "2035", "fridge": "Left", "shelf": "Shelf 5 Row 3", "box": "", "pricePerBottle": "22", "totalPrice": "44", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 180, "label": "Tahbilk", "variety": "Grenache Mourvedre Rosé", "vintage": "2022", "rating": "95", "qty": 6, "cellarRaw": "2027", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "22", "totalPrice": "132", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 181, "label": "Tahbilk", "variety": "Grenache Mourvedre Rosé", "vintage": "2023", "rating": "94", "qty": 6, "cellarRaw": "2026", "fridge": "", "shelf": "", "box": "", "pricePerBottle": "21", "totalPrice": "126", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 182, "label": "Tahbilk", "variety": "Cane Cut Marsanne", "vintage": "2018", "rating": "95", "qty": 1, "cellarRaw": "2030", "fridge": "Left", "shelf": "Shelf 1 Row 3", "box": "", "pricePerBottle": "20", "totalPrice": "20", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 183, "label": "Tahbilk", "variety": "Marsanne", "vintage": "2019", "rating": "93", "qty": 1, "cellarRaw": "2039", "fridge": "Left", "shelf": "Shelf 5 Row 3", "box": "", "pricePerBottle": "20", "totalPrice": "20", "region": "Nagambie Lakes", "country": "Australia"}, {"id": 184, "label": "TONIC", "variety": "Chardonnay", "vintage": "2019", "rating": "", "qty": 1, "cellarRaw": "2025", "fridge": "Left", "shelf": "Shelf 4 Row 2", "box": "20", "pricePerBottle": "37", "totalPrice": "37", "region": "South Australia", "country": "Australia"}]
+const CURRENT_YEAR = 2026;
+const STORAGE_KEY = "wineCellarData";
+
+function toNum(v) {
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+function classify(variety) {
+  const v = variety.toLowerCase();
+  if (/sparkling|grand vintage/.test(v)) return "Sparkling";
+  if (/ros[ée]/.test(v)) return "Rosé";
+  if (/riesling|chardonnay|marsanne|pinot gris|sauvignon blanc|gruner|semillon/.test(v)) return "White";
+  return "Red";
+}
+
+function parseDrinkWindow(raw) {
+  const s = (raw || "").trim();
+  if (!s) return { status: "unknown", label: "No date recorded" };
+  const openEnded = /\+/.test(s);
+  const nums = (s.match(/\d{2,4}/g) || []).map(Number);
+  if (nums.length === 0) return { status: "unknown", label: "No date recorded" };
+
+  if (nums.length === 1) {
+    const y = nums[0];
+    if (openEnded) {
+      if (CURRENT_YEAR >= y) return { status: "ready", label: `Drinking well since ${y}` };
+      return { status: "cellaring", label: `Cellar until ${y}` };
+    }
+    if (CURRENT_YEAR < y - 1) return { status: "cellaring", label: `Cellar until ~${y}` };
+    if (CURRENT_YEAR > y + 2) return { status: "overdue", label: `Past its ${y} window — drink soon` };
+    return { status: "ready", label: `In its drinking window (to ~${y})` };
+  }
+
+  let start = nums[0];
+  let end = nums[1];
+  if (end < 100) end = Math.floor(start / 100) * 100 + end;
+  if (CURRENT_YEAR < start) return { status: "cellaring", label: `Cellar until ${start}` };
+  if (CURRENT_YEAR <= end) return { status: "ready", label: `Drinking window open (${start}–${end})` };
+  if (openEnded) return { status: "ready", label: `Drinking well now (open since ${end})` };
+  return { status: "overdue", label: `Past its ${start}–${end} window — drink soon` };
+}
+
+const STATUS_META = {
+  ready: { label: "Ready", color: "var(--st-ready)" },
+  cellaring: { label: "Cellaring", color: "var(--st-cellaring)" },
+  overdue: { label: "Drink soon", color: "var(--st-overdue)" },
+  unknown: { label: "Unrated window", color: "var(--st-unknown)" },
+};
+
+function normalize(w) {
+  return { ...w, qty: toNum(w.qty), pricePerBottle: toNum(w.pricePerBottle), totalPrice: toNum(w.totalPrice) };
+}
+
+function Icon({ name, size = 16 }) {
+  const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  const paths = {
+    search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    plus: <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    minus: <line x1="5" y1="12" x2="19" y2="12"/>,
+    chevronLeft: <polyline points="15 18 9 12 15 6"/>,
+    trash: <><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2"/></>,
+    mapPin: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></>,
+    wine: <><path d="M8 22h8"/><path d="M12 15v7"/><path d="M6 2h12l-1.5 8a4.5 4.5 0 01-9 0z"/></>,
+    list: <><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></>,
+    grid: <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>,
+  };
+  return <svg {...common}>{paths[name]}</svg>;
+}
+
+function CellarApp() {
+  const [wines, setWines] = useState(null);
+  const [tab, setTab] = useState("cellar");
+  const [search, setSearch] = useState("");
+  const [colorFilter, setColorFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [drillFilter, setDrillFilter] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const byId = Object.fromEntries(RAW_WINES.map((w) => [w.id, w]));
+        let changed = false;
+        const migrated = parsed.map((w) => {
+          if (w.region !== undefined && w.country !== undefined) return w;
+          changed = true;
+          const src = byId[w.id];
+          return { ...w, region: w.region ?? (src ? src.region : ""), country: w.country ?? (src ? src.country : "") };
+        });
+        setWines(migrated);
+        if (changed) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        }
+      } else {
+        const initial = RAW_WINES.map(normalize);
+        setWines(initial);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      }
+    } catch (e) {
+      setWines(RAW_WINES.map(normalize));
+    }
+  }, []);
+
+  function persist(next) {
+    setWines(next);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
+  }
+
+  const filtered = useMemo(() => {
+    if (!wines) return [];
+    const term = search.trim().toLowerCase();
+    return wines
+      .filter((w) => w.qty > 0)
+      .filter((w) => {
+        if (term && !(w.label.toLowerCase().includes(term) || w.variety.toLowerCase().includes(term))) return false;
+        if (colorFilter !== "All" && classify(w.variety) !== colorFilter) return false;
+        if (statusFilter !== "All" && parseDrinkWindow(w.cellarRaw).status !== statusFilter) return false;
+        if (drillFilter && w[drillFilter.type] !== drillFilter.value) return false;
+        return true;
+      })
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [wines, search, colorFilter, statusFilter, drillFilter]);
+
+  const stats = useMemo(() => {
+    if (!wines) return null;
+    const active = wines.filter((w) => w.qty > 0);
+    const totalBottles = active.reduce((s, w) => s + w.qty, 0);
+    const totalValue = active.reduce((s, w) => s + w.pricePerBottle * w.qty, 0);
+    const byColor = {};
+    const byStatus = { ready: 0, cellaring: 0, overdue: 0, unknown: 0 };
+    const byCountry = {};
+    const byRegion = {};
+    active.forEach((w) => {
+      const c = classify(w.variety);
+      byColor[c] = (byColor[c] || 0) + w.qty;
+      byStatus[parseDrinkWindow(w.cellarRaw).status] += w.qty;
+      if (w.country) byCountry[w.country] = (byCountry[w.country] || 0) + w.qty;
+      if (w.region) byRegion[w.region] = (byRegion[w.region] || 0) + w.qty;
+    });
+    const rated = active.filter((w) => w.rating && /^\d+/.test(w.rating));
+    const avgRating = rated.length ? (rated.reduce((s, w) => s + parseInt(w.rating), 0) / rated.length).toFixed(1) : null;
+    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, avgRating, distinctLabels: active.length };
+  }, [wines]);
+
+  function updateQty(wine, delta) {
+    const next = wines.map((w) => {
+      if (w.id !== wine.id) return w;
+      const qty = Math.max(0, w.qty + delta);
+      return { ...w, qty, totalPrice: qty * w.pricePerBottle };
+    });
+    persist(next);
+    if (selected && selected.id === wine.id) setSelected(next.find((w) => w.id === wine.id));
+  }
+
+  function removeWine(wine) {
+    persist(wines.filter((w) => w.id !== wine.id));
+    setSelected(null);
+    setConfirmDelete(false);
+  }
+
+  function saveWine(form) {
+    const qty = toNum(form.qty);
+    const pricePerBottle = toNum(form.pricePerBottle);
+    const payload = { ...form, qty, pricePerBottle, totalPrice: qty * pricePerBottle };
+    let next;
+    if (form.id) {
+      next = wines.map((w) => (w.id === form.id ? { ...w, ...payload } : w));
+    } else {
+      const maxId = wines.reduce((m, w) => Math.max(m, w.id), 0);
+      next = [...wines, { ...payload, id: maxId + 1 }];
+    }
+    persist(next);
+    setEditing(null);
+    setTab("cellar");
+  }
+
+  function exportCsv() {
+    const headers = ["label","variety","region","country","vintage","rating","qty","cellarRaw","fridge","shelf","box","pricePerBottle","totalPrice"];
+    const rows = wines.map((w) => headers.map((h) => `"${String(w[h] ?? "").replace(/"/g, '""')}"`).join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cellar_export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  if (!wines) {
+    return <div className="loading">Opening the cellar…</div>;
+  }
+
+  return (
+    <div className="cellar-root">
+      {!editing && (
+        <nav className="tabbar">
+          <button className={"tab-btn" + (tab === "cellar" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("cellar"); }}>
+            <Icon name="list" size={18}/><span>Cellar</span>
+          </button>
+          <button className={"tab-btn" + (tab === "add" ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("add"); }}>
+            <Icon name="plus" size={18}/><span>Add</span>
+          </button>
+          <button className={"tab-btn" + (tab === "stats" && !selected ? " tab-active" : "")} onClick={() => { setSelected(null); setTab("stats"); }}>
+            <Icon name="grid" size={18}/><span>Summary</span>
+          </button>
+        </nav>
+      )}
+      {tab === "cellar" && !selected && !editing && (
+        <div className="screen">
+          <header className="hero">
+            <div className="hero-label">The cellar</div>
+            <div className="hero-count">{stats.totalBottles}</div>
+            <div className="hero-sub">bottles across {stats.distinctLabels} labels</div>
+          </header>
+
+          <div className="search-row">
+            <Icon name="search" size={16} />
+            <input className="search-input" placeholder="Search label or variety" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+
+          {drillFilter && (
+            <div className="drill-chip">
+              <span>{drillFilter.type === "country" ? "Country" : "Region"}: {drillFilter.value}</span>
+              <button onClick={() => setDrillFilter(null)} aria-label="Clear filter">×</button>
+            </div>
+          )}
+
+          <div className="chip-row">
+            {["All", "Red", "White", "Rosé", "Sparkling"].map((c) => (
+              <button key={c} className={"chip" + (colorFilter === c ? " chip-active" : "")} onClick={() => setColorFilter(c)}>{c}</button>
+            ))}
+          </div>
+          <div className="chip-row">
+            {[{k:"All",l:"All"},{k:"ready",l:"Ready"},{k:"cellaring",l:"Cellaring"},{k:"overdue",l:"Drink soon"}].map((s) => (
+              <button key={s.k} className={"chip chip-status" + (statusFilter === s.k ? " chip-active" : "")} onClick={() => setStatusFilter(s.k)}>{s.l}</button>
+            ))}
+          </div>
+
+          <div className="list">
+            {filtered.length === 0 && (
+              <div className="empty"><Icon name="wine" size={28} /><p>No bottles match. Try a different search or filter.</p></div>
+            )}
+            {filtered.map((w) => {
+              const dw = parseDrinkWindow(w.cellarRaw);
+              const meta = STATUS_META[dw.status];
+              return (
+                <button className="label-card" key={w.id} onClick={() => setSelected(w)}>
+                  <div className="label-vintage">{w.vintage}</div>
+                  <div className="label-body">
+                    <div className="label-name">{w.label}</div>
+                    <div className="label-variety">{w.variety}</div>
+                    {(w.region || w.country) && (<div className="label-region">{w.region}{w.region && w.country ? ", " : ""}{w.country}</div>)}
+                    <div className="label-loc"><Icon name="mapPin" size={11} /> {w.fridge || "—"}{w.shelf ? ` · ${w.shelf}` : ""}</div>
+                    <div className="label-drink" style={{ color: meta.color }}>{dw.label}</div>
+                  </div>
+                  <div className="label-side">
+                    <div className="qty-badge">{w.qty}</div>
+                    <div className="status-dot" style={{ background: meta.color }} title={dw.label} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {selected && (
+        <div className="screen">
+          <button className="back-btn" onClick={() => setSelected(null)}><Icon name="chevronLeft" size={18}/> Cellar</button>
+          <div className="detail-card">
+            <div className="detail-vintage">{selected.vintage}</div>
+            <div className="detail-name">{selected.label}</div>
+            <div className="detail-variety">{selected.variety}</div>
+            {selected.photo && <img className="detail-photo" src={selected.photo} alt="Label" />}
+            {(() => {
+              const dw = parseDrinkWindow(selected.cellarRaw);
+              const meta = STATUS_META[dw.status];
+              return <div className="detail-status" style={{ borderColor: meta.color, color: meta.color }}>{dw.label}</div>;
+            })()}
+            <div className="detail-grid">
+              <div className="detail-field"><div className="detail-field-label">Region</div><div className="detail-field-value">{selected.region || "—"}{selected.country ? `, ${selected.country}` : ""}</div></div>
+              <div className="detail-field"><div className="detail-field-label">Location</div><div className="detail-field-value">{selected.fridge || "—"}{selected.shelf ? ` · ${selected.shelf}` : ""}{selected.box ? ` · Box ${selected.box}` : ""}</div></div>
+              <div className="detail-field"><div className="detail-field-label">Rating</div><div className="detail-field-value">{selected.rating || "—"}</div></div>
+              <div className="detail-field"><div className="detail-field-label">Price / bottle</div><div className="detail-field-value">${selected.pricePerBottle.toFixed(2)}</div></div>
+              <div className="detail-field"><div className="detail-field-label">Total value</div><div className="detail-field-value">${(selected.qty * selected.pricePerBottle).toFixed(2)}</div></div>
+            </div>
+            <div className="qty-control">
+              <div className="qty-control-label">In cellar</div>
+              <div className="qty-stepper">
+                <button aria-label="Remove one bottle" onClick={() => updateQty(selected, -1)}><Icon name="minus" size={16}/></button>
+                <span>{selected.qty}</span>
+                <button aria-label="Add one bottle" onClick={() => updateQty(selected, 1)}><Icon name="plus" size={16}/></button>
+              </div>
+            </div>
+            <div className="detail-actions">
+              <button className="btn btn-secondary" onClick={() => setEditing(selected)}>Edit details</button>
+              <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}><Icon name="trash" size={14}/> Remove</button>
+            </div>
+            {confirmDelete && (
+              <div className="confirm-box">
+                <p>Remove this entry from your cellar log entirely?</p>
+                <div className="confirm-actions">
+                  <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>Cancel</button>
+                  <button className="btn btn-danger" onClick={() => removeWine(selected)}>Remove</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(tab === "add" || editing) && (
+        <WineForm initial={editing} onCancel={() => { setEditing(null); setTab("cellar"); }} onSave={saveWine} />
+      )}
+
+      {tab === "stats" && !editing && (
+        <div className="screen">
+          <header className="hero hero-small"><div className="hero-label">Cellar summary</div></header>
+          <div className="stat-grid">
+            <div className="stat-card"><div className="stat-label">Bottles</div><div className="stat-value">{stats.totalBottles}</div></div>
+            <div className="stat-card"><div className="stat-label">Cellar value</div><div className="stat-value">${Math.round(stats.totalValue).toLocaleString()}</div></div>
+            <div className="stat-card"><div className="stat-label">Distinct labels</div><div className="stat-value">{stats.distinctLabels}</div></div>
+            <div className="stat-card"><div className="stat-label">Avg. rating</div><div className="stat-value">{stats.avgRating || "—"}</div></div>
+          </div>
+          <div className="section-title">By colour</div>
+          <div className="bar-list">
+            {Object.entries(stats.byColor).sort((a,b) => b[1]-a[1]).map(([k,v]) => (
+              <div className="bar-row" key={k}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </div>
+            ))}
+          </div>
+          <div className="section-title">Drinking status</div>
+          <div className="bar-list">
+            {[{k:"ready",l:"Ready"},{k:"cellaring",l:"Cellaring"},{k:"overdue",l:"Drink soon"},{k:"unknown",l:"Unrated window"}].map(({k,l}) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setStatusFilter(k); setTab("cellar"); }}>
+                <div className="bar-row-label">{l}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(stats.byStatus[k]/stats.totalBottles)*100}%`, background: STATUS_META[k].color }} /></div>
+                <div className="bar-row-value">{stats.byStatus[k]}</div>
+              </button>
+            ))}
+          </div>
+          <div className="section-title">By country</div>
+          <div className="bar-list">
+            {Object.entries(stats.byCountry).sort((a,b) => b[1]-a[1]).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "country", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
+            ))}
+            {Object.keys(stats.byCountry).length === 0 && <p className="sync-note">No country data recorded yet.</p>}
+          </div>
+          <div className="section-title">Top regions</div>
+          <div className="bar-list">
+            {Object.entries(stats.byRegion).sort((a,b) => b[1]-a[1]).slice(0,8).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "region", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
+            ))}
+            {Object.keys(stats.byRegion).length === 0 && <p className="sync-note">No region data recorded yet.</p>}
+          </div>
+          <button className="btn btn-secondary" style={{ width: "100%", marginTop: "1.5rem" }} onClick={exportCsv}>Export cellar as CSV</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function resizeImage(file, maxWidth) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function WineForm({ initial, onCancel, onSave }) {
+  const [form, setForm] = useState(initial || { id: null, label: "", variety: "", region: "", country: "", vintage: "", rating: "", qty: 1, cellarRaw: "", fridge: "", shelf: "", box: "", pricePerBottle: "", photo: "" });
+  const [photoBusy, setPhotoBusy] = useState(false);
+  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+  async function handlePhoto(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    setPhotoBusy(true);
+    try {
+      const dataUrl = await resizeImage(file, 800);
+      set("photo", dataUrl);
+    } catch (err) {
+      // ignore, leave photo unset
+    }
+    setPhotoBusy(false);
+  }
+  return (
+    <div className="screen form-screen">
+      <button className="back-btn" onClick={onCancel}><Icon name="chevronLeft" size={18}/> Cancel</button>
+      <div className="form-title">{initial ? "Edit bottle" : "Add a bottle"}</div>
+
+      <label className="field-label">Label photo</label>
+      <div className="photo-row">
+        {form.photo ? (
+          <img className="photo-preview" src={form.photo} alt="Label" />
+        ) : (
+          <div className="photo-placeholder">No photo yet</div>
+        )}
+        <div className="photo-actions">
+          <label className="btn btn-secondary photo-btn">
+            {photoBusy ? "Processing…" : form.photo ? "Retake photo" : "Take photo"}
+            <input type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={handlePhoto} />
+          </label>
+          {form.photo && (
+            <button className="btn btn-secondary photo-btn" onClick={() => set("photo", "")}>Remove</button>
+          )}
+        </div>
+      </div>
+
+      <label className="field-label">Label / producer</label>
+      <input className="field-input" value={form.label} onChange={(e) => set("label", e.target.value)} placeholder="e.g. Bleasdale" />
+      <label className="field-label">Variety / wine name</label>
+      <input className="field-input" value={form.variety} onChange={(e) => set("variety", e.target.value)} placeholder="e.g. Old Vine Shiraz" />
+      <div className="field-row">
+        <div className="field-col"><label className="field-label">Region</label><input className="field-input" value={form.region} onChange={(e) => set("region", e.target.value)} placeholder="e.g. Barossa Valley" /></div>
+        <div className="field-col"><label className="field-label">Country</label><input className="field-input" value={form.country} onChange={(e) => set("country", e.target.value)} placeholder="e.g. Australia" /></div>
+      </div>
+      <div className="field-row">
+        <div className="field-col"><label className="field-label">Vintage</label><input className="field-input" value={form.vintage} onChange={(e) => set("vintage", e.target.value)} placeholder="2021" /></div>
+        <div className="field-col"><label className="field-label">Rating</label><input className="field-input" value={form.rating} onChange={(e) => set("rating", e.target.value)} placeholder="95" /></div>
+      </div>
+      <div className="field-row">
+        <div className="field-col"><label className="field-label">Quantity</label><input type="number" min="0" className="field-input" value={form.qty} onChange={(e) => set("qty", e.target.value)} /></div>
+        <div className="field-col"><label className="field-label">Price / bottle ($)</label><input type="number" min="0" step="0.01" className="field-input" value={form.pricePerBottle} onChange={(e) => set("pricePerBottle", e.target.value)} /></div>
+      </div>
+      <label className="field-label">Cellaring date</label>
+      <input className="field-input" value={form.cellarRaw} onChange={(e) => set("cellarRaw", e.target.value)} placeholder="e.g. 2035 or 2028-2034" />
+      <div className="field-row">
+        <div className="field-col"><label className="field-label">Fridge / rack</label><input className="field-input" value={form.fridge} onChange={(e) => set("fridge", e.target.value)} placeholder="Left / Middle / Right / Box" /></div>
+        <div className="field-col"><label className="field-label">Shelf position</label><input className="field-input" value={form.shelf} onChange={(e) => set("shelf", e.target.value)} placeholder="Shelf 2 Row 1" /></div>
+      </div>
+      <label className="field-label">Box code</label>
+      <input className="field-input" value={form.box} onChange={(e) => set("box", e.target.value)} placeholder="optional" />
+      <button className="btn btn-primary form-submit" onClick={() => { if (!form.label.trim()) return; onSave(form); }}>{initial ? "Save changes" : "Add to cellar"}</button>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
+</script>
+<style>
+.cellar-root {
+  --bg: #17130F; --surface: #221B15; --surface-raised: #2A2219; --border: #3D3327;
+  --claret: #7C2333; --brass: #BC935E;
+  --text-primary: #EEE3D3; --text-secondary: #A99A87; --text-muted: #7C7060;
+  --st-ready: #8A9A5B; --st-cellaring: #6E86A0; --st-overdue: #C1652E; --st-unknown: #6B6357;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text-primary);
+  border-radius: 20px; overflow: hidden; min-height: 640px;
+  display: flex; flex-direction: column; position: relative;
+}
+.loading { padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary); font-family: 'Fraunces', serif; font-size: 18px; }
+.screen { padding: 1.25rem; flex: 1; overflow-y: auto; }
+.hero { padding: 1.5rem 0 1.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.hero-small { border-bottom: none; padding-bottom: 0.5rem; }
+.hero-label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+.hero-count { font-family: 'Fraunces', serif; font-weight: 600; font-size: 48px; line-height: 1.1; margin-top: 4px; }
+.hero-sub { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+.search-row { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; margin-bottom: 10px; color: var(--text-muted); }
+.search-input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 14px; width: 100%; font-family: 'Inter', sans-serif; }
+.search-input::placeholder { color: var(--text-muted); }
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.drill-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface-raised); border: 1px solid var(--brass); border-radius: 10px; padding: 7px 10px; margin-bottom: 8px; font-size: 12px; color: var(--brass); }
+.drill-chip button { background: none; border: none; color: var(--brass); cursor: pointer; font-size: 16px; line-height: 1; }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-family: 'Inter', sans-serif; cursor: pointer; }
+.chip-active { background: var(--claret); border-color: var(--claret); color: #F3E4E7; }
+.chip-status.chip-active { background: var(--brass); border-color: var(--brass); color: #2A2010; }
+.list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.label-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; text-align: left; cursor: pointer; width: 100%; font-family: inherit; color: var(--text-primary); }
+.label-vintage { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; color: var(--brass); min-width: 52px; }
+.label-body { flex: 1; min-width: 0; }
+.label-name { font-size: 14px; font-weight: 500; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label-variety { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label-loc { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; margin-top: 2px; }
+.label-drink { font-size: 11px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label-region { font-size: 11px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label-side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.qty-badge { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; padding: 2px 7px; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; }
+.back-btn { background: none; border: none; color: var(--brass); display: flex; align-items: center; gap: 2px; font-size: 14px; padding: 0 0 1rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+.detail-vintage { font-family: 'Fraunces', serif; font-weight: 700; font-size: 40px; color: var(--brass); line-height: 1; }
+.detail-name { font-size: 18px; font-weight: 500; margin-top: 8px; }
+.detail-variety { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.detail-status { display: inline-block; margin-top: 12px; border: 1px solid; border-radius: 999px; padding: 4px 12px; font-size: 12px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1.25rem; }
+.detail-field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.detail-field-value { font-size: 14px; margin-top: 3px; }
+.qty-control { display: flex; align-items: center; justify-content: space-between; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.qty-control-label { font-size: 13px; color: var(--text-secondary); }
+.qty-stepper { display: flex; align-items: center; gap: 12px; }
+.qty-stepper button { background: var(--surface-raised); border: 1px solid var(--border); color: var(--text-primary); width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.qty-stepper span { font-family: 'Fraunces', serif; font-size: 20px; min-width: 20px; text-align: center; }
+.detail-actions { display: flex; gap: 8px; margin-top: 1.25rem; }
+.btn { border-radius: 10px; padding: 10px 14px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border); flex: 1; }
+.btn-secondary { background: var(--surface-raised); color: var(--text-primary); }
+.btn-danger { background: rgba(193,101,46,0.12); border-color: var(--st-overdue); color: var(--st-overdue); }
+.btn-primary { background: var(--claret); border-color: var(--claret); color: #F3E4E7; }
+.confirm-box { margin-top: 1rem; background: var(--surface-raised); border: 1px solid var(--st-overdue); border-radius: 10px; padding: 12px; }
+.confirm-box p { font-size: 13px; margin: 0 0 10px; }
+.confirm-actions { display: flex; gap: 8px; }
+.form-title { font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 1rem; }
+.photo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.photo-preview { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); }
+.photo-placeholder { width: 72px; height: 72px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); text-align: center; padding: 4px; box-sizing: border-box; }
+.photo-actions { display: flex; flex-direction: column; gap: 6px; }
+.photo-btn { flex: none; padding: 7px 12px; font-size: 12px; cursor: pointer; }
+.detail-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-top: 12px; border: 1px solid var(--border); }
+.field-label { font-size: 12px; color: var(--text-secondary); margin: 12px 0 4px; display: block; }
+.field-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; color: var(--text-primary); font-size: 14px; font-family: 'Inter', sans-serif; box-sizing: border-box; }
+.field-row { display: flex; gap: 10px; }
+.field-col { flex: 1; }
+.form-submit { width: 100%; margin-top: 1.5rem; padding: 12px; font-size: 14px; }
+.section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brass); margin: 1.5rem 0 10px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-value { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; margin-top: 4px; }
+.bar-list { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 8px; }
+.bar-row-clickable { width: 100%; background: none; border: none; padding: 4px 0; cursor: pointer; font-family: inherit; text-align: left; }
+.bar-row-clickable:hover .bar-row-label { color: var(--brass); }
+.bar-row-label { font-size: 12px; color: var(--text-secondary); width: 108px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sync-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.bar-track { flex: 1; height: 8px; background: var(--surface-raised); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--brass); border-radius: 4px; }
+.bar-row-value { font-size: 12px; width: 24px; text-align: right; }
+.tabbar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 0 8px; flex-shrink: 0; }
+.tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; }
+.tab-active { color: var(--brass); }
+</style>
+</body>
+</html>
+
 </head>
 <body>
 <div id="root"></div>
