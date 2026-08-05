@@ -37,6 +37,30 @@ function classify(variety) {
   return "Red";
 }
 
+const GRAPE_OVERRIDES = {
+  grange: "Shiraz", "bin 707": "Cabernet Sauvignon", "mag rwt": "Shiraz", rwt: "Shiraz",
+  "st henri": "Shiraz", "bin 28": "Shiraz", "magill estate": "Shiraz", odyssey: "Cabernet Sauvignon",
+  "la belle voisine": "Pinot Noir", gigondas: "Grenache Blend", filsell: "Shiraz", cabernet: "Cabernet Sauvignon",
+  "collezione cinquanta+3": "Primitivo", "alleanza toscana igt": "Sangiovese Blend",
+};
+const GRAPE_CHECKS = [
+  [/shiraz|syrah/, "Shiraz/Syrah"], [/cabernet/, "Cabernet Sauvignon"], [/pinot noir/, "Pinot Noir"],
+  [/grenache/, "Grenache"], [/riesling/, "Riesling"], [/chardonnay/, "Chardonnay"], [/malbec/, "Malbec"],
+  [/merlot/, "Merlot"], [/tempranillo|rioja/, "Tempranillo"], [/nebbiolo/, "Nebbiolo"],
+  [/sauvignon blanc/, "Sauvignon Blanc"], [/pinot gris/, "Pinot Gris"], [/marsanne/, "Marsanne"],
+  [/semillon/, "Semillon"], [/gruner/, "Grüner Veltliner"], [/nero d.avola/, "Nero d'Avola"],
+];
+function classifyGrape(variety) {
+  const v = variety.toLowerCase().trim();
+  if (GRAPE_OVERRIDES[v]) return GRAPE_OVERRIDES[v];
+  if (/sparkling|grand vintage/.test(v)) return "Sparkling";
+  if (/ros[ée]/.test(v)) return "Rosé";
+  const matches = [...new Set(GRAPE_CHECKS.filter(([re]) => re.test(v)).map(([, name]) => name))];
+  if (matches.length === 0) return "Other / Blend";
+  if (matches.length === 1) return matches[0];
+  return "Blend";
+}
+
 function parseDrinkWindow(raw) {
   const s = (raw || "").trim();
   if (!s) return { status: "unknown", label: "No date recorded" };
@@ -143,7 +167,11 @@ function CellarApp() {
         if (term && !(w.label.toLowerCase().includes(term) || w.variety.toLowerCase().includes(term))) return false;
         if (colorFilter !== "All" && classify(w.variety) !== colorFilter) return false;
         if (statusFilter !== "All" && parseDrinkWindow(w.cellarRaw).status !== statusFilter) return false;
-        if (drillFilter && w[drillFilter.type] !== drillFilter.value) return false;
+        if (drillFilter) {
+          if (drillFilter.type === "grape") {
+            if (classifyGrape(w.variety) !== drillFilter.value) return false;
+          } else if (w[drillFilter.type] !== drillFilter.value) return false;
+        }
         return true;
       })
       .sort((a, b) => a.label.localeCompare(b.label));
@@ -158,16 +186,19 @@ function CellarApp() {
     const byStatus = { ready: 0, cellaring: 0, overdue: 0, unknown: 0 };
     const byCountry = {};
     const byRegion = {};
+    const byGrape = {};
     active.forEach((w) => {
       const c = classify(w.variety);
       byColor[c] = (byColor[c] || 0) + w.qty;
       byStatus[parseDrinkWindow(w.cellarRaw).status] += w.qty;
       if (w.country) byCountry[w.country] = (byCountry[w.country] || 0) + w.qty;
       if (w.region) byRegion[w.region] = (byRegion[w.region] || 0) + w.qty;
+      const g = classifyGrape(w.variety);
+      byGrape[g] = (byGrape[g] || 0) + w.qty;
     });
     const rated = active.filter((w) => w.rating && /^\d+/.test(w.rating));
     const avgRating = rated.length ? (rated.reduce((s, w) => s + parseInt(w.rating), 0) / rated.length).toFixed(1) : null;
-    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, avgRating, distinctLabels: active.length };
+    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, byGrape, avgRating, distinctLabels: active.length };
   }, [wines]);
 
   function updateQty(wine, delta) {
@@ -249,7 +280,7 @@ function CellarApp() {
 
           {drillFilter && (
             <div className="drill-chip">
-              <span>{drillFilter.type === "country" ? "Country" : "Region"}: {drillFilter.value}</span>
+              <span>{drillFilter.type === "country" ? "Country" : drillFilter.type === "region" ? "Region" : "Variety"}: {drillFilter.value}</span>
               <button onClick={() => setDrillFilter(null)} aria-label="Clear filter">×</button>
             </div>
           )}
@@ -359,6 +390,16 @@ function CellarApp() {
                 <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
                 <div className="bar-row-value">{v}</div>
               </div>
+            ))}
+          </div>
+          <div className="section-title">Top varieties</div>
+          <div className="bar-list">
+            {Object.entries(stats.byGrape).sort((a,b) => b[1]-a[1]).slice(0,8).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "grape", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
             ))}
           </div>
           <div className="section-title">Drinking status</div>
