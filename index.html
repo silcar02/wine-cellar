@@ -234,6 +234,7 @@ function CellarApp() {
     const byCountry = {};
     const byRegion = {};
     const byGrape = {};
+    const byVintage = {};
     active.forEach((w) => {
       const c = classify(w.variety);
       byColor[c] = (byColor[c] || 0) + w.qty;
@@ -242,10 +243,11 @@ function CellarApp() {
       if (w.region) byRegion[w.region] = (byRegion[w.region] || 0) + w.qty;
       const g = classifyGrape(w.variety);
       byGrape[g] = (byGrape[g] || 0) + w.qty;
+      if (w.vintage) byVintage[w.vintage] = (byVintage[w.vintage] || 0) + w.qty;
     });
     const rated = active.filter((w) => w.rating && /^\d+/.test(w.rating));
     const avgRating = rated.length ? (rated.reduce((s, w) => s + parseInt(w.rating), 0) / rated.length).toFixed(1) : null;
-    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, byGrape, avgRating, distinctLabels: active.length };
+    return { totalBottles, totalValue, byColor, byStatus, byCountry, byRegion, byGrape, byVintage, avgRating, distinctLabels: active.length };
   }, [wines]);
 
   function updateQty(wine, delta) {
@@ -355,7 +357,7 @@ function CellarApp() {
 
           {drillFilter && (
             <div className="drill-chip">
-              <span>{drillFilter.type === "country" ? "Country" : drillFilter.type === "region" ? "Region" : "Variety"}: {drillFilter.value}</span>
+              <span>{{ country: "Country", region: "Region", grape: "Variety", vintage: "Vintage" }[drillFilter.type]}: {drillFilter.value}</span>
               <button onClick={() => setDrillFilter(null)} aria-label="Clear filter">×</button>
             </div>
           )}
@@ -471,6 +473,16 @@ function CellarApp() {
           <div className="bar-list">
             {Object.entries(stats.byGrape).sort((a,b) => b[1]-a[1]).slice(0,8).map(([k,v]) => (
               <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "grape", value: k }); setTab("cellar"); }}>
+                <div className="bar-row-label">{k}</div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
+                <div className="bar-row-value">{v}</div>
+              </button>
+            ))}
+          </div>
+          <div className="section-title">By vintage</div>
+          <div className="bar-list">
+            {Object.entries(stats.byVintage).sort((a,b) => parseInt(b[0])-parseInt(a[0])).map(([k,v]) => (
+              <button className="bar-row bar-row-clickable" key={k} onClick={() => { setDrillFilter({ type: "vintage", value: k }); setTab("cellar"); }}>
                 <div className="bar-row-label">{k}</div>
                 <div className="bar-track"><div className="bar-fill" style={{ width: `${(v/stats.totalBottles)*100}%` }} /></div>
                 <div className="bar-row-value">{v}</div>
