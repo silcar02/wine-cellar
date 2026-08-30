@@ -169,6 +169,7 @@ function CellarApp() {
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [storageError, setStorageError] = useState("");
   const [pendingImport, setPendingImport] = useState(null);
   const [importError, setImportError] = useState("");
   const fileInputRef = useRef(null);
@@ -202,7 +203,12 @@ function CellarApp() {
 
   function persist(next) {
     setWines(next);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setStorageError("");
+    } catch (e) {
+      setStorageError("That last change couldn't be saved — your device's storage for this app is full. Photos take up the most space; try removing a photo from another bottle, then try again.");
+    }
   }
 
   const filtered = useMemo(() => {
@@ -344,6 +350,12 @@ function CellarApp() {
             <Icon name="grid" size={18}/><span>Summary</span>
           </button>
         </nav>
+      )}
+      {storageError && (
+        <div className="storage-banner">
+          <span>{storageError}</span>
+          <button onClick={() => setStorageError("")} aria-label="Dismiss">×</button>
+        </div>
       )}
       {tab === "cellar" && !selected && !editing && (
         <div className="screen">
@@ -567,7 +579,7 @@ function resizeImage(file, maxWidth) {
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
+        resolve(canvas.toDataURL("image/jpeg", 0.55));
       };
       img.onerror = reject;
       img.src = reader.result;
@@ -580,17 +592,19 @@ function resizeImage(file, maxWidth) {
 function WineForm({ initial, onCancel, onSave }) {
   const [form, setForm] = useState(initial || { id: null, label: "", variety: "", region: "", country: "", vintage: "", rating: "", qty: 1, cellarRaw: "", fridge: "", shelf: "", box: "", pricePerBottle: "", photo: "" });
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState("");
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
   async function handlePhoto(e) {
     const file = e.target.files && e.target.files[0];
     e.target.value = "";
     if (!file) return;
     setPhotoBusy(true);
+    setPhotoError("");
     try {
-      const dataUrl = await resizeImage(file, 800);
+      const dataUrl = await resizeImage(file, 640);
       set("photo", dataUrl);
     } catch (err) {
-      // ignore, leave photo unset
+      setPhotoError("Couldn't process that photo. Try taking it again.");
     }
     setPhotoBusy(false);
   }
@@ -616,6 +630,7 @@ function WineForm({ initial, onCancel, onSave }) {
           )}
         </div>
       </div>
+      {photoError && <p className="import-error">{photoError}</p>}
 
       <label className="field-label">Label / producer</label>
       <input className="field-input" value={form.label} onChange={(e) => set("label", e.target.value)} placeholder="e.g. Bleasdale" />
@@ -742,6 +757,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<CellarApp />);
 .bar-fill { height: 100%; background: var(--brass); border-radius: 4px; }
 .bar-row-value { font-size: 12px; width: 24px; text-align: right; }
 .tabbar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 0 8px; flex-shrink: 0; }
+.storage-banner { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: rgba(193,101,46,0.15); border-bottom: 1px solid var(--st-overdue); color: var(--st-overdue); font-size: 12px; padding: 10px 14px; flex-shrink: 0; }
+.storage-banner button { background: none; border: none; color: var(--st-overdue); font-size: 16px; line-height: 1; cursor: pointer; flex-shrink: 0; }
 .tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif; }
 .tab-active { color: var(--brass); }
 </style>
