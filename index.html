@@ -278,6 +278,9 @@ function CellarApp() {
       next = [...wines, { ...payload, id: maxId + 1 }];
     }
     persist(next);
+    if (selected && selected.id === form.id) {
+      setSelected(next.find((w) => w.id === form.id));
+    }
     setEditing(null);
     setTab("cellar");
   }
