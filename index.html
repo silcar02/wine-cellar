@@ -174,6 +174,18 @@ function CellarApp() {
   const [importError, setImportError] = useState("");
   const fileInputRef = useRef(null);
 
+  function photoKey(id) {
+    return `wine_photo_${id}`;
+  }
+
+  function loadPhoto(id) {
+    try {
+      return localStorage.getItem(photoKey(id)) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -182,32 +194,48 @@ function CellarApp() {
         const byId = Object.fromEntries(RAW_WINES.map((w) => [w.id, w]));
         let changed = false;
         const migrated = parsed.map((w) => {
-          if (w.region !== undefined && w.country !== undefined) return w;
-          changed = true;
-          const src = byId[w.id];
-          return { ...w, region: w.region ?? (src ? src.region : ""), country: w.country ?? (src ? src.country : "") };
+          let out = w;
+          if (w.region === undefined || w.country === undefined) {
+            changed = true;
+            const src = byId[w.id];
+            out = { ...out, region: out.region ?? (src ? src.region : ""), country: out.country ?? (src ? src.country : "") };
+          }
+          const photo = loadPhoto(w.id);
+          if (photo) out = { ...out, photo };
+          return out;
         });
         setWines(migrated);
         if (changed) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated.map(({ photo, ...rest }) => rest)));
         }
       } else {
         const initial = RAW_WINES.map(normalize);
         setWines(initial);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial.map(({ photo, ...rest }) => rest)));
       }
     } catch (e) {
       setWines(RAW_WINES.map(normalize));
     }
   }, []);
 
-  function persist(next) {
+  function persist(next, photoUpdate) {
     setWines(next);
+    if (photoUpdate) {
+      try {
+        if (photoUpdate.photo) {
+          localStorage.setItem(photoKey(photoUpdate.id), photoUpdate.photo);
+        } else {
+          localStorage.removeItem(photoKey(photoUpdate.id));
+        }
+      } catch (e) {
+        setStorageError("That photo couldn't be saved — your device's storage for this app is full. Try removing a photo from another bottle, then try again. The rest of your change was saved fine.");
+      }
+    }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      setStorageError("");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next.map(({ photo, ...rest }) => rest)));
+      if (!photoUpdate) setStorageError("");
     } catch (e) {
-      setStorageError("That last change couldn't be saved — your device's storage for this app is full. Photos take up the most space; try removing a photo from another bottle, then try again.");
+      setStorageError("That last change couldn't be saved — your device's storage for this app is full.");
     }
   }
 
@@ -268,6 +296,7 @@ function CellarApp() {
 
   function removeWine(wine) {
     persist(wines.filter((w) => w.id !== wine.id));
+    try { localStorage.removeItem(photoKey(wine.id)); } catch (e) {}
     setSelected(null);
     setConfirmDelete(false);
   }
@@ -277,15 +306,22 @@ function CellarApp() {
     const pricePerBottle = toNum(form.pricePerBottle);
     const payload = { ...form, qty, pricePerBottle, totalPrice: qty * pricePerBottle };
     let next;
+    let finalId;
+    let photoChanged = false;
     if (form.id) {
+      finalId = form.id;
+      const prev = wines.find((w) => w.id === form.id);
+      photoChanged = !prev || (prev.photo || "") !== (form.photo || "");
       next = wines.map((w) => (w.id === form.id ? { ...w, ...payload } : w));
     } else {
       const maxId = wines.reduce((m, w) => Math.max(m, w.id), 0);
-      next = [...wines, { ...payload, id: maxId + 1 }];
+      finalId = maxId + 1;
+      photoChanged = !!form.photo;
+      next = [...wines, { ...payload, id: finalId }];
     }
-    persist(next);
-    if (selected && selected.id === form.id) {
-      setSelected(next.find((w) => w.id === form.id));
+    persist(next, photoChanged ? { id: finalId, photo: form.photo || "" } : null);
+    if (selected && selected.id === finalId) {
+      setSelected(next.find((w) => w.id === finalId));
     }
     setEditing(null);
     setTab("cellar");
@@ -327,6 +363,14 @@ function CellarApp() {
 
   function confirmImport() {
     if (pendingImport) {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("wine_photo_")) keysToRemove.push(key);
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+      } catch (e) {}
       persist(pendingImport);
       setPendingImport(null);
     }
